@@ -8,19 +8,6 @@ const binaryContentTypesToBeSaved = [
   'image/png', 'image/jpeg', 'image/jpg', 'application/x-tar'
 ];
 
-const getBearerToken = async () => {
-  try {
-    const cookies = new Cookies();
-    const sessionToken = cookies.get('authToken');
-    if (sessionToken !== null && sessionToken !== undefined) {
-      return 'Bearer ' + sessionToken;
-    } else {
-      return '';
-    }
-  } catch (error) {
-    return '';
-  }
-};
 
 const parseData = async (response: any, headers: Headers, debug = false) => {
   if (debug) {
@@ -91,16 +78,12 @@ const SendHTTPrequest = async (requestConfig: RequestConfig) => {
   // Headers settings
   const url = API_ENDPOINT + requestConfig.endpoint;
 
-  let allHeaders = {
-    ...requestConfig.headers,
-    Authorization: await getBearerToken()
-  };
 
   const fetchConfig: any = {};
-  fetchConfig.headers = allHeaders;
+  fetchConfig.headers = requestConfig.headers;
   fetchConfig.method = requestConfig.method;
 
-  if(allHeaders['Content-Type'] === 'application/json'){
+  if(requestConfig.headers['Content-Type'] === 'application/json'){
     const stringifiedJSON = JSON.stringify(requestConfig.data)
     fetchConfig.body = stringifiedJSON;
   } else {

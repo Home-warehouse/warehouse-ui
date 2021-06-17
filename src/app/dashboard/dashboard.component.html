@@ -1,1 +1,100 @@
-<h1 class="is-size-2">Dashboard</h1>
+<h1 class="is-size-2 my-6">Dashboard</h1>
+
+<!-- Elements -->
+<div class="columns horizontal">
+  <div class="column is-12-mobile is-7-tablet is-7-fullhd">
+    <table class="table">
+      <thead>
+        <tr>
+          <th><input type="checkbox"></th>
+          <th>Name</th>
+          <th>Custom</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: elements, index: 1 }">
+        </ng-container>
+      </tbody>
+      <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInit('location')">Add Root
+        Location</button>
+    </table>
+  </div>
+  <!-- Details -->
+  <div class="column is-12-mobile is-5-tablet is-4-widescreen is-offset-1-widescreen is-4-fullhd is-offset-1-fullhd">
+    <div *ngIf="showDetails">
+      <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
+      <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
+      <h2 class="is-size-3">Details</h2>
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <input *ngIf="selectedElement.hasOwnProperty('locationName')" class="input" type="text" [(ngModel)]="selectedElement.locationName"  (focusout)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text" [(ngModel)]="selectedElement.productName"  (focusout)="onElementUpdate()" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Description</label>
+        <div class="control">
+          <textarea class="textarea has-fixed-size" [(ngModel)]="selectedElement.description" (focusout)="onElementUpdate()" >
+        </textarea>
+        </div>
+      </div>
+      <button *ngIf="selectedElement.parent" class="button is-primary" (click)="onNewElementSave()">Add new element</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Templates -->
+
+<!-- Products -->
+<ng-template #productsListTmpl let-list="productsList" let-i="index">
+  <!-- Products row -->
+  <tr *ngFor="let node of list" [ngClass]="{'is-selected': selectedElement==node.node}">
+    <td><input type="checkbox"></td>
+    <td (click)="onElementSelect(node.node)">
+      <p style="{{'margin-left: '+ i + 'px'}}">{{node.node.productName}}</p>
+    </td>
+    <td>{{node.node.id}}</td>
+    <td></td>
+  </tr>
+</ng-template>
+
+<!-- Locations -->
+<ng-template #recursiveLocationsListTmpl let-list="locationsList" let-i="index">
+  <ng-container *ngFor="let node of list">
+    <!-- Location row -->
+    <tr
+      [ngClass]="{'is-selected': selectedElement==node.node, 'has-background-grey-lighter': selectedElement!=node.node}">
+      <td (click)="onElementSelect(node.node)">
+        <div class="my-2"><input type="checkbox"></div>
+      </td>
+      <td>
+        <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{node.node.locationName}}</p>
+      </td>
+      <td>{{node.node.id}} </td>
+      <td>
+        <button class="button is-small is-info is-light mx-1 mt-1"
+          (click)="onNewElementInit('location', node.node.id)">Add Location</button>
+        <button class="button is-small is-warning is-light mx-1  mt-1"
+          (click)="onNewElementInit('product', node.node.id)">Add Product</button>
+      </td>
+      <!-- <td>{{i}}</td> -->
+    </tr>
+    <!-- Products -->
+    <ng-container *ngIf="node.node.products">
+      <ng-container
+        *ngTemplateOutlet="productsListTmpl; context:{ productsList: node.node.products.edges, index: i+10 }">
+      </ng-container>
+    </ng-container>
+    <!-- SubLocations -->
+    <ng-container *ngIf="node.node.childrens">
+      <ng-container
+        *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: node.node.childrens.edges, index: i+40 }">
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</ng-template>

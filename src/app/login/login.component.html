@@ -1,7 +1,7 @@
 <div class="columns horizontal">
   <!-- Sign In -->
   <div class="column is-12-mobile is-5-tablet is-offset-1-widescreen is-2-fullhd is-offset-3-fullhd">
-    <h1 class="is-size-2 mb-5">Sign In</h1>
+    <h1 class="is-size-2 my-5">Sign In</h1>
     <form [formGroup]="SignInForm" (ngSubmit)="onSignInSubmit()">
       <div class="field">
         <label class="label">Email</label>
@@ -24,7 +24,7 @@
 
   <!-- SignUp -->
   <div class="column is-12-mobile is-5-tablet is-offset-1-tablet is-offset-1-widescreen is-2-fullhd is-offset-1-fullhd">
-    <h1 class="is-size-2 mb-5">Sign Up</h1>
+    <h1 class="is-size-2 my-5">Sign Up</h1>
     <form [formGroup]="SignUpForm" (ngSubmit)="onSignUpSubmit()">
       <div class="field">
         <label class="label">Email*</label>
@@ -36,7 +36,8 @@
       <div class="field">
         <label class="label">Name*</label>
         <div class="control">
-          <input class="input" type="text" placeholder="First name" formControlName="firstName" name="firstName">
+          <input class="input" type="text" placeholder="First name" formControlName="firstName" name="firstName"
+            [ngClass]="{'is-danger': SignUpForm.controls?.firstName?.invalid && SignUpForm.controls?.firstName?.touched}">
         </div>
       </div>
       <div class="field">

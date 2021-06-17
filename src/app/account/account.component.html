@@ -1,0 +1,49 @@
+<div class="columns horizontal">
+  <!-- Account details -->
+  <div class="column is-12-mobile is-5-tablet is-offset-1-tablet is-offset-1-widescreen is-2-fullhd is-offset-1-fullhd">
+  <h1 class="is-size-2">Hi {{oldAccountData.firstName}}</h1>
+    <form [formGroup]="AccountForm" (ngSubmit)="onAccountDataUpdateSubmit()">
+      <div class="field">
+        <label class="label">Email</label>
+        <div class="control">
+          <input class="input" type="email" placeholder="Email" formControlName="email" name="email"
+            [ngClass]="{'is-danger': AccountForm.controls?.email?.invalid && AccountForm.controls?.email?.touched}">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="First name" formControlName="firstName" name="firstName"
+            [ngClass]="{'is-danger': AccountForm.controls?.firstName?.invalid && AccountForm.controls?.firstName?.touched}">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Last Name</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="Last name" formControlName="lastName" name="lastName">
+        </div>
+      </div>
+      <h2 class="do"></h2>
+      <div class="field">
+        <label class="label">Old Password</label>
+        <div class="control">
+          <input class="input" type="password" placeholder="Old Password" formControlName="oldPassword" name="oldPassword">
+          <p *ngIf="AccountForm.controls?.oldPassword?.invalid && AccountForm.controls?.oldPassword?.dirty"
+            class="help is-danger">
+            Minimum lenght of password is 5 characters
+          </p>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">New Password</label>
+        <div class="control">
+          <input class="input" type="password" placeholder="New Password" formControlName="newPassword" name="newPassword">
+          <p *ngIf="AccountForm.controls?.newPassword?.invalid && AccountForm.controls?.newPassword?.dirty"
+            class="help is-danger">
+            Minimum lenght of password is 5 characters
+          </p>
+        </div>
+      </div>
+      <input type="submit" [disabled]="!AccountForm.valid" class="button is-primary" value="Update">
+    </form>
+  </div>

@@ -1,0 +1,8 @@
+<div
+  *ngIf="displayNotification"
+  class="notification is-primary"
+  [ngClass]="{'is-danger': notificationType === 'ERROR' }"
+  >
+  <button (click)="closeNotification()" class="delete"></button>
+  {{ notificationMessage }}
+</div>

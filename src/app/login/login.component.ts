@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { SendHTTPrequest } from 'src/common/api/wrapper';
-import { RequestConfig } from 'src/common/interfaces/request.interface';
+import { apiFetch } from 'src/common/api/api';
+import { NotificationsSharedService } from '../notifications/notifications.sharedService';
+import {Router} from "@angular/router"
+import getFormAsDict from 'src/common/form';
 
 @Component({
   selector: 'app-login',
@@ -12,13 +14,15 @@ export class LoginComponent implements OnInit {
   SignUpForm: FormGroup;
   SignInForm: FormGroup;
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router,
+    private notifications: NotificationsSharedService,
   ) {
     this.SignUpForm = this.fb.group({
       email: new FormControl('', [Validators.email, Validators.required]),
-      firstName: new FormControl(''),
+      firstName: new FormControl('', [Validators.required]),
       lastName: new FormControl(''),
-      password: new FormControl('', [Validators.minLength(4), Validators.required])
+      password: new FormControl('', [Validators.minLength(5), Validators.required])
     });
     this.SignInForm = this.fb.group({
       email: new FormControl('', Validators.email),
@@ -26,43 +30,50 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  getFormAsDict = (form: FormGroup) => {
-    let formDict: any = {};
-    Object.keys(form.value).forEach(element => {
-      const field = form.get(String(element));
-      if (field){
-        if(field.value !== null){
-          formDict[String(element)] = field.value
-        }
-      }
-    });
-    return formDict;
-  }
-
   onSignUpSubmit = async () => {
-    let formDict = this.getFormAsDict(this.SignUpForm)
+    let formDict = getFormAsDict(this.SignUpForm)
+    const response = await apiFetch({
+      query: `mutation createAccount($email: String, $password: String){
+        createAccount(accountDetails: {email: $email, password: $password}){
+          created
+        }
+      }`,
+      variables: formDict
+    })
+    if(response.data){
+      console.log(response.data.data)
+    }
   }
 
   onSignInSubmit = async () => {
-    let formDict = this.getFormAsDict(this.SignInForm)
-
-    const requestConfig: RequestConfig = {
-      endpoint: 'graphql',
-      method: 'POST',
-      headers: {"content-type": "application/json"},
-      data: JSON.stringify({
-        query: `query login($email: String, $password: String){
-          login(email: $email, password: $password){
-            authenticated,
-            accessToken
-          }
-        }`,
-        variables: formDict
-      }),
+    let formDict = getFormAsDict(this.SignInForm)
+    const response = await apiFetch({
+      query: `query login($email: String, $password: String){
+        login(email: $email, password: $password){
+          authenticated,
+          accessToken
+        }
+      }`,
+      variables: formDict
+    })
+    if(response.data){
+      const accessToken = response.data.data.login.accessToken
+      if (accessToken){
+        localStorage.setItem("accessToken", accessToken)
+        this.router.navigate(['/dashboard'])
+      } else {
+        this.notifications.sendOpenNotificationEvent({
+          message: `Couldnt sign in - check if you typed correct credentials`,
+           type: 'ERROR'
+        });
       }
-
-    const response = await SendHTTPrequest(requestConfig);
-  }
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Couldnt obtain data from remote server`,
+         type: 'ERROR'
+      });
+    }
+    }
 
   ngOnInit(): void {
 
