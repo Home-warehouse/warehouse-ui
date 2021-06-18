@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Location } from "../../common/interfaces/location.interface";
-import { moveItemInArray, CdkDragDrop } from "@angular/cdk/drag-drop"
 import { apiFetch } from 'src/common/api/api';
-import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+// import { moveItemInArray, CdkDragDrop } from "@angular/cdk/drag-drop"
 
 
 @Component({
@@ -15,6 +13,7 @@ export class DashboardComponent implements OnInit {
   @Input() selectedElement: any;
   @Output() selectedElementChange = new EventEmitter();
   elements!: any[];
+  isCreatingNewElement: boolean = false;
   searchingIn: any;
 
   constructor() {}
@@ -63,39 +62,37 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  updateRecNested = (element: any, parentId: string) => {
-    if(element.locationName){
-      if(this.searchingIn.id === parentId){
-        // console.log('Found in root!')
-        if(this.searchingIn.childrens.edges){
-          this.searchingIn.childrens.edges.push({node: element})
-        } else {
-          this.searchingIn.childrens.edges = [{node: element}]
-        }
-        return
-      }
-      this.searchingIn.childrens.edges.every((parentNode: any)=>{
-        if(parentNode.node.id===parentId){
-          if(parentNode.node.childrens.edges){
-            parentNode.node.childrens.edges.push({node: element})
+  updateRecNested = (subType: string, element: any, parentId: string) => {
+    if(this.searchingIn.id === parentId){
+          // console.log('Found in root!')
+          if(this.searchingIn[subType].edges){
+            this.searchingIn[subType].edges.push({node: element})
           } else {
-            parentNode.node.childrens.edges = [{node: element}]
+            this.searchingIn[subType].edges = [{node: element}]
           }
-          // console.log('Found in childrens!')
           return
-        } else {
-          if(parentNode.node.childrens){
-            this.searchingIn = parentNode.node
-            this.updateRecNested(element, parentId)
-          }
         }
-      })
-    }
+        this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
+          if(parentNode.node.id===parentId){
+            if(parentNode.node[subType].edges){
+              parentNode.node[subType].edges.push({node: element})
+            } else {
+              parentNode.node[subType].edges = [{node: element}]
+            }
+            return
+          } else {
+            if(parentNode.node.childrens){
+              this.searchingIn = parentNode.node
+              this.updateRecNested(subType, element, parentId)
+            }
+          }
+        })
   }
 
 
   // Selection
   onElementSelect = (element: any) => {
+    this.isCreatingNewElement = false
     this.showDetails = true;
     // console.log(element)
     this.selectedElement = element
@@ -107,10 +104,22 @@ export class DashboardComponent implements OnInit {
   // Update
   onElementUpdate = async() => {
     if(this.selectedElement.productName){
+      const { id, ...productDet } = this.selectedElement
     // If element is product
-
+    const responseUpdate = await apiFetch({
+      query: `
+      mutation modProduct($id: String!, $productDetails: ProductInput!){
+        modifyProduct(id:$id, productDetails: $productDetails){
+          modified
+        }
+      }
+      `,
+      variables: {
+        id: this.selectedElement.id,
+        productDetails: productDet
+      }
+    })
     } else {
-      console.log(this.selectedElement)
       const { childrens, id, products, ...locationDet } = this.selectedElement
 
       const responseUpdate = await apiFetch({
@@ -132,7 +141,6 @@ export class DashboardComponent implements OnInit {
 
   // Create
   onNewElementInit = async(elementType: string, parentId?: string) => {
-    this.showDetails = true
     if(elementType === 'location'){
       this.selectedElement = {
         parent: parentId,
@@ -144,7 +152,15 @@ export class DashboardComponent implements OnInit {
       }
       this.selectedElementChange.emit(this.selectedElement)
     }
-
+    if(elementType === 'product'){
+      this.selectedElement = {
+        parent: parentId,
+        productName: ''
+      }
+      this.selectedElementChange.emit(this.selectedElement)
+    }
+    this.isCreatingNewElement = true
+    this.showDetails = true
   }
 
 
@@ -153,6 +169,12 @@ export class DashboardComponent implements OnInit {
   onNewElementSave = async() => {
     if(this.selectedElement.productName){
       // If element is product
+      this.elements.forEach((node)=> {
+        this.searchingIn = node.node
+        this.updateRecNested('products', this.selectedElement, this.selectedElement.parent)
+      })
+      const { parent, ...productDet } = this.selectedElement
+      await this.saveNewProductAPI(productDet)
 
       } else {
         // console.log('loookinn for loc with id ', this.selectedElement.parent)
@@ -160,13 +182,61 @@ export class DashboardComponent implements OnInit {
           // foreach root
           this.elements.forEach((node)=> {
             this.searchingIn = node.node
-            this.updateRecNested(this.selectedElement, this.selectedElement.parent)
+            this.updateRecNested('childrens', this.selectedElement, this.selectedElement.parent)
           })
         } else {
           this.elements.push({node: this.selectedElement})
         }
 
         const { parent, ...locationDet } = this.selectedElement
+        await this.saveNewSubLocationAPI(locationDet)
+      }
+    this.isCreatingNewElement = false
+  }
+
+
+
+
+  saveNewProductAPI = async(productDetails: any) => {
+    // Create product
+    const responseProduct = await apiFetch({
+      query: `
+      mutation createProd($productDetails: ProductInput!){
+        createProduct(productDetails: $productDetails){
+          product{
+            id
+          }
+        }
+      }
+      `,
+      variables: {
+        productDetails: productDetails
+      }
+    })
+
+    console.log(responseProduct)
+    // Update parent location
+    const responseParent = await apiFetch({
+      query: `
+      mutation modLocation($parent_id: String!, $product_id: ID!){
+        modifyLocation(id:$parent_id, locationDetails: {products: [$product_id]}){
+          modified
+        }
+      }
+      `,
+      variables: {
+        parent_id: this.selectedElement.parent,
+        product_id: responseProduct.data.data.createProduct.product.id
+      }
+    })
+    delete this.selectedElement.parent
+
+    // Update ID
+    this.selectedElement.id = responseProduct.data.data.createProduct.product.id
+    this.selectedElementChange.emit(this.selectedElement);
+  }
+
+  saveNewSubLocationAPI = async(locationDetails: any) => {
         // Create sub location
         const responseSub = await apiFetch({
           query: `
@@ -179,7 +249,7 @@ export class DashboardComponent implements OnInit {
           }
           `,
           variables: {
-            locationDetails: locationDet
+            locationDetails: locationDetails
           }
         })
 
@@ -205,7 +275,6 @@ export class DashboardComponent implements OnInit {
         // Update ID
         this.selectedElement.id = responseSub.data.data.createLocation.location.id
         this.selectedElementChange.emit(this.selectedElement);
-      }
   }
 
   ngOnInit(): void {

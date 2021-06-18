@@ -40,7 +40,7 @@
         </textarea>
         </div>
       </div>
-      <button *ngIf="selectedElement.parent" class="button is-primary" (click)="onNewElementSave()">Add new element</button>
+      <button *ngIf="selectedElement.parent || isCreatingNewElement" class="button is-primary" (click)="onNewElementSave()">Add new element</button>
     </div>
   </div>
 </div>
@@ -58,7 +58,7 @@
     <td (click)="onElementSelect(node.node)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{node.node.productName}}</p>
     </td>
-    <td>{{node.node.id}}</td>
+    <td (click)="onElementSelect(node.node)"></td>
     <td></td>
   </tr>
 </ng-template>
@@ -72,10 +72,10 @@
       <td (click)="onElementSelect(node.node)">
         <div class="my-2"><input type="checkbox"></div>
       </td>
-      <td>
+      <td (click)="onElementSelect(node.node)">
         <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{node.node.locationName}}</p>
       </td>
-      <td>{{node.node.id}} </td>
+      <td (click)="onElementSelect(node.node)"></td>
       <td>
         <button class="button is-small is-info is-light mx-1 mt-1"
           (click)="onNewElementInit('location', node.node.id)">Add Location</button>
