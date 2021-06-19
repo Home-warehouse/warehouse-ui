@@ -64,29 +64,49 @@ export class DashboardComponent implements OnInit {
 
   updateRecNested = (subType: string, element: any, parentId: string) => {
     if(this.searchingIn.id === parentId){
-          // console.log('Found in root!')
-          if(this.searchingIn[subType].edges){
-            this.searchingIn[subType].edges.push({node: element})
-          } else {
-            this.searchingIn[subType].edges = [{node: element}]
-          }
-          return
+      // console.log('Found in root!')
+      if(this.searchingIn[subType].edges){
+        this.searchingIn[subType].edges.push({node: element})
+      } else {
+        this.searchingIn[subType].edges = [{node: element}]
+      }
+      return
+    }
+    this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
+        if(parentNode.node.childrens){
+          this.searchingIn = parentNode.node
+          this.updateRecNested(subType, element, parentId)
         }
-        this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
-          if(parentNode.node.id===parentId){
-            if(parentNode.node[subType].edges){
-              parentNode.node[subType].edges.push({node: element})
-            } else {
-              parentNode.node[subType].edges = [{node: element}]
-            }
-            return
-          } else {
-            if(parentNode.node.childrens){
-              this.searchingIn = parentNode.node
-              this.updateRecNested(subType, element, parentId)
-            }
+    })
+  }
+
+
+  deleteRecNested = (subType: string) => {
+    // console.log('Lokkin at', this.searchingIn)
+    if(subType==='childrens'){
+      if(this.searchingIn.node === this.selectedElement){
+        console.log('Deleteing', this.searchingIn.node)
+        delete this.searchingIn.node
+        return true
+      } else {
+        if(this.searchingIn.node){
+          for (let parentNode of this.searchingIn.node.childrens.edges){
+            this.searchingIn = parentNode
+            this.deleteRecNested(subType)
           }
-        })
+        }
+      }
+    }
+    if (subType==='products'){
+        this.searchingIn.node.products.edges = this.searchingIn.node.products.edges.filter((parentNode: any) => parentNode.node !== this.selectedElement)
+        if(this.searchingIn.node.childrens){
+          for (let parentNode of this.searchingIn.node.childrens.edges){
+            this.searchingIn = parentNode
+            this.deleteRecNested(subType)
+        }
+      }
+    }
+    return false
   }
 
 
@@ -138,24 +158,63 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // Delete
+  onElementDelete = async() => {
+    // console.log(this.elements)
+    this.showDetails = false
+    this.searchingIn = this.elements[0]
+    if(this.selectedElement.productName){
+      this.deleteRecNested('products')
+      const responseDelProd = await apiFetch({
+        query: `
+        mutation deleteProd($id: ID!){
+          deleteProduct(id: $id){
+              deleted
+          }
+        }
+        `,
+        variables: {
+          id: this.selectedElement.id
+        }
+      })
+    } else {
+      this.deleteRecNested('childrens')
+      const responseDelLoc = await apiFetch({
+        query: `
+        mutation deleteLoc($id: ID!){
+          deleteLocation(id: $id){
+              deleted
+          }
+        }
+        `,
+        variables: {
+          id: this.selectedElement.id
+        }
+      })
+    }
+  }
 
   // Create
   onNewElementInit = async(elementType: string, parentId?: string) => {
     if(elementType === 'location'){
       this.selectedElement = {
         parent: parentId,
-        locationName: ''
+        locationName: '',
+        childrens: {
+          edges: []
+        }
       }
       if(!parentId){
         this.selectedElement.root = true
         delete this.selectedElement.parent
       }
+      console.log("creating new element:", this.selectedElement)
       this.selectedElementChange.emit(this.selectedElement)
     }
     if(elementType === 'product'){
       this.selectedElement = {
         parent: parentId,
-        productName: ''
+        productName: '',
       }
       this.selectedElementChange.emit(this.selectedElement)
     }
@@ -169,8 +228,8 @@ export class DashboardComponent implements OnInit {
   onNewElementSave = async() => {
     if(this.selectedElement.productName){
       // If element is product
-      this.elements.forEach((node)=> {
-        this.searchingIn = node.node
+      this.elements.forEach((parentNode)=> {
+        this.searchingIn = parentNode.node
         this.updateRecNested('products', this.selectedElement, this.selectedElement.parent)
       })
       const { parent, ...productDet } = this.selectedElement
@@ -180,15 +239,15 @@ export class DashboardComponent implements OnInit {
         // console.log('loookinn for loc with id ', this.selectedElement.parent)
         if(this.selectedElement.parent){
           // foreach root
-          this.elements.forEach((node)=> {
-            this.searchingIn = node.node
+          this.elements.forEach((parentNode)=> {
+            this.searchingIn = parentNode.node
             this.updateRecNested('childrens', this.selectedElement, this.selectedElement.parent)
           })
         } else {
           this.elements.push({node: this.selectedElement})
         }
 
-        const { parent, ...locationDet } = this.selectedElement
+        const { parent, childrens, ...locationDet } = this.selectedElement
         await this.saveNewSubLocationAPI(locationDet)
       }
     this.isCreatingNewElement = false
@@ -237,6 +296,7 @@ export class DashboardComponent implements OnInit {
   }
 
   saveNewSubLocationAPI = async(locationDetails: any) => {
+        console.log("Saving new location", this.selectedElement)
         // Create sub location
         const responseSub = await apiFetch({
           query: `
