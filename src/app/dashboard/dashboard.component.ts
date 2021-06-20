@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
       return
     }
     this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
-        if(parentNode.node.childrens){
+        if(parentNode.node){
           this.searchingIn = parentNode.node
           this.updateRecNested(subType, element, parentId)
         }

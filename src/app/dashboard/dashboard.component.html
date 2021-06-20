@@ -8,7 +8,7 @@
         <tr>
           <th><input type="checkbox"></th>
           <th>Name</th>
-          <th>Custom</th>
+          <!-- <th>Custom</th> -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -23,9 +23,11 @@
   <!-- Details -->
   <div class="column is-12-mobile is-5-tablet is-4-widescreen is-offset-1-widescreen is-4-fullhd is-offset-1-fullhd">
     <div *ngIf="showDetails">
-      <p>{{selectedElement | json}}</p>
-      <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
-      <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
+      <!-- <p>{{selectedElement | json}}</p> -->
+      <div class="is-flex is-justify-content-space-between">
+        <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
+        <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
+      </div>
       <h2 class="is-size-3">Details</h2>
       <div class="field">
         <label class="label">Name</label>
@@ -60,7 +62,7 @@
     <td (click)="onElementSelect(parentNode.node)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
     </td>
-    <td (click)="onElementSelect(parentNode.node)">{{parentNode.node.id}}</td>
+    <!-- <td (click)="onElementSelect(parentNode.node)">{{parentNode.node.id}}</td> -->
     <td></td>
   </tr>
 </ng-template>
@@ -68,7 +70,7 @@
 <!-- Locations -->
 <ng-template #recursiveLocationsListTmpl let-list="locationsList" let-i="index">
   <ng-container *ngFor="let parentNode of list">
-    <div *ngIf="parentNode.hasOwnProperty('node')">
+    <ng-container *ngIf="parentNode.hasOwnProperty('node')">
     <!-- Location row -->
     <tr
       [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
@@ -78,7 +80,7 @@
       <td (click)="onElementSelect(parentNode.node)">
         <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{parentNode.node.locationName}}</p>
       </td>
-      <td (click)="onElementSelect(parentNode.node)">{{parentNode.node.id}}</td>
+      <!-- <td (click)="onElementSelect(parentNode.node)">{{parentNode.node.id}}</td> -->
       <td>
         <button class="button is-small is-info is-light mx-1 mt-1"
           (click)="onNewElementInit('location', parentNode.node.id)">Add Location</button>
@@ -87,6 +89,7 @@
       </td>
       <!-- <td>{{i}}</td> -->
     </tr>
+
     <!-- Products -->
     <ng-container  *ngIf="parentNode.node.hasOwnProperty('products')">
       <ng-container
@@ -99,6 +102,6 @@
         *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: parentNode.node.childrens.edges, index: i+40 }">
       </ng-container>
     </ng-container>
-  </div>
+  </ng-container>
   </ng-container>
 </ng-template>
