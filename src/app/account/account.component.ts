@@ -12,6 +12,7 @@ import getFormAsDict from 'src/common/form';
 export class AccountComponent implements OnInit {
   oldAccountData: any = {}
   AccountForm: FormGroup
+  PasswordForm: FormGroup
   constructor(
     private fb: FormBuilder,
     private notifications: NotificationsSharedService,
@@ -20,9 +21,11 @@ export class AccountComponent implements OnInit {
       email: new FormControl('', [Validators.email, Validators.required]),
       firstName: new FormControl(''),
       lastName: new FormControl(''),
-      oldPassword: new FormControl(''),
-      newPassword: new FormControl('', [Validators.minLength(5)])
     });
+    this.PasswordForm = this.fb.group({
+      oldPassword: new FormControl('', [ Validators.required]),
+      password: new FormControl('', [Validators.minLength(5), Validators.required])
+    })
   }
 
   getAccountData = async() =>{
@@ -39,12 +42,54 @@ export class AccountComponent implements OnInit {
       this.oldAccountData = response.data.data.myAccount
       Object.keys(this.oldAccountData).forEach((key)=>{
         this.AccountForm.controls[key].setValue(this.oldAccountData[key])
-        // console.log(key, valuesToBeSet[key])
       })
   }
 
   onAccountDataUpdateSubmit = async()=>{
+    let formDict = getFormAsDict(this.AccountForm)
+    const response = await apiFetch({
+      query: `mutation updateAcc($accountDetails: AccountInput!){
+        modifyAccount(accountDetails: $accountDetails){
+          modified
+        }
+      }`,
+      variables: {
+        accountDetails: formDict
+      }
+    })
+    if(response.data.data.modifyAccount.modified){
+      this.notifications.sendOpenNotificationEvent({
+        message: `Updated account information successfully`,
+         type: 'SUCCESS'
+      });
+    }
+  }
 
+  onPasswordDataUpdateSubmit = async() => {
+    let formDict = getFormAsDict(this.PasswordForm)
+    const response = await apiFetch({
+      query: `mutation updateAcc($accountDetails: AccountInput!, $oldPwd: String!){
+        modifyAccount(accountDetails: $accountDetails, oldPassword: $oldPwd){
+          modified
+        }
+      }`,
+      variables: {
+        accountDetails: {password: formDict.password},
+        oldPwd: formDict.oldPassword
+      }
+    })
+    this.PasswordForm.reset();
+    if(response.data.data.modifyAccount.modified){
+      this.notifications.sendOpenNotificationEvent({
+          message: `Updated password successfully`,
+           type: 'SUCCESS'
+        });
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Couldnt update password`,
+         type: 'ERROR'
+      });
+    }
   }
 
   ngOnInit(): void {
