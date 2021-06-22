@@ -19,6 +19,9 @@ export class DashboardComponent implements OnInit {
 
   constructor() {}
 
+  //
+  // START QUERIES
+  //
   queryCustomColumns = async() => {
     const response = await apiFetch({
       query: `
@@ -26,16 +29,15 @@ export class DashboardComponent implements OnInit {
         customColumnsList{
           edges{
             node{
-              dataType
-              elementsAllowed
               id
               name
+              dataType
+              elementsAllowed
             }
           }
         }
       }`
     })
-    // console.log(response)
     this.customColumns = response.data.data.customColumnsList.edges
   }
 
@@ -103,8 +105,11 @@ export class DashboardComponent implements OnInit {
     this.elements = response.data.data.locationsList.edges
   }
 
+
+
+
   //
-  // Custom Columns
+  // CUSTOM COLUMNS
   //
   findCustomColumnValue = (customId: string, customValues: any) => {
     const value: any =  customValues.find((parentNode: any)=> {
@@ -134,9 +139,8 @@ export class DashboardComponent implements OnInit {
     return ""
   }
 
-  updateCustomColumnModel = (columnModelNode: any, event: any) => {
+  updateCustomColumnModel = async(columnModelNode?: any, event?: any) => {
     if(!this.selectedElement.customColumns){
-      console.log("Adding new element")
       this.selectedElement.customColumns.edges = [
         {node:{
           customColumn: {
@@ -168,15 +172,14 @@ export class DashboardComponent implements OnInit {
   }
 
 
+
+
   //
-  // Recursive
+  // RECURSIVE FUNCTIONS
   //
 
   updateRecNested = (subType: string, element: any, parentId: string) => {
-    // console.log("Searching for ", subType, this.searchingIn)
     if(this.searchingIn.id === parentId){
-      // console.log('Found it!')
-      // console.log(this.searchingIn['childrens'])
       if(this.searchingIn[subType].edges){
         this.searchingIn[subType].edges.push({node: element})
       } else {
@@ -224,7 +227,8 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  // Selection
+
+  // SELECT ELEMENT
   onElementSelect = (element: any) => {
     this.isCreatingNewElement = false
     this.showDetails = true;
@@ -233,17 +237,31 @@ export class DashboardComponent implements OnInit {
     this.selectedElementChange.emit(this.selectedElement)
   }
 
+  // UPDATE CUSTOM COLUMN
+  onCustomColumnUpdate = (allowedType: string) => {
+    if(this.selectedElement.elementsAllowed.includes(allowedType)){
+      this.selectedElement.elementsAllowed = this.selectedElement.elementsAllowed.filter((allowedTypeLocal: string)=>{
+        return allowedTypeLocal !== allowedType
+      })
+    } else {
+      this.selectedElement.elementsAllowed.push(allowedType)
+    }
+    this.onElementUpdate()
+  }
 
 
-  // Update
+  // UPDATE ELEMENT
   onElementUpdate = async() => {
     if(this.selectedElement.id){
-      const customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
-        return {
-          customColumn: parentNode.node.customColumn.id,
-          value: parentNode.node.value
-        }
-      })
+      let customColumnsArr
+      if(!this.selectedElement.name){
+        customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
+          return {
+            customColumn: parentNode.node.customColumn.id,
+            value: parentNode.node.value
+          }
+        })
+      }
       if(this.selectedElement.productName){
         const { id, customColumns, ...productDet } = this.selectedElement
       // If element is product
@@ -260,7 +278,7 @@ export class DashboardComponent implements OnInit {
           productDetails: {...productDet, customColumns: customColumnsArr},
         }
       })
-      } else {
+      } else if(this.selectedElement.locationName){
         const { customColumns, childrens, id, products, ...locationDet } = this.selectedElement
 
         const responseUpdate = await apiFetch({
@@ -274,14 +292,31 @@ export class DashboardComponent implements OnInit {
           variables: {
             id: this.selectedElement.id,
             locationDetails: {...locationDet, customColumns: customColumnsArr},
-
           }
         })
+      } else if(this.selectedElement.name){
+        const { id, ...customColumnDetails } = this.selectedElement
+        const resp = await apiFetch({
+          query: `
+            mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
+              modifyCustomColumn(id:$id, customColumnDetails: $customColumnDetails){
+                customColumn{
+                  id
+                }
+              }
+            }
+            `,
+            variables: {
+              id: this.selectedElement.id,
+              customColumnDetails: customColumnDetails
+            }
+        })
+        console.log(resp)
       }
     }
   }
 
-  // Delete
+  // DELETE ELEMENT
   onElementDelete = async() => {
     // console.log(this.elements)
     this.showDetails = false
@@ -300,7 +335,7 @@ export class DashboardComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
-    } else {
+    } else if(this.selectedElement.childrens){
       this.deleteRecNested('childrens')
       const responseDelLoc = await apiFetch({
         query: `
@@ -314,10 +349,26 @@ export class DashboardComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
+    } else if(this.selectedElement.name) {
+      this.customColumns = this.customColumns.filter((column: any)=>{
+        return column.node.id !== this.selectedElement.id
+      })
+      const responseDelCustomColumn = await apiFetch({
+        query: `
+        mutation deleteCustomColumn($id: ID!){
+          deleteCustomColumn(id: $id){
+              deleted
+          }
+        }
+        `,
+        variables: {
+          id: this.selectedElement.id
+        }
+      })
     }
   }
 
-  // Create
+  // CREATE ELEMENT
   onNewElementInit = async(elementType: string, parentId?: string) => {
     if(elementType === 'location'){
       this.selectedElement = {
@@ -337,10 +388,7 @@ export class DashboardComponent implements OnInit {
         this.selectedElement.root = true
         delete this.selectedElement.parent
       }
-      console.log("creating new element:", this.selectedElement)
-      this.selectedElementChange.emit(this.selectedElement)
-    }
-    if(elementType === 'product'){
+    } else if(elementType === 'product'){
       this.selectedElement = {
         parent: parentId,
         productName: '',
@@ -348,22 +396,37 @@ export class DashboardComponent implements OnInit {
           edges: []
         }
       }
-      this.selectedElementChange.emit(this.selectedElement)
+    } else if(elementType==='customColumn'){
+      this.selectedElement = {
+        name: "",
+        elementsAllowed: [],
+        dataType: ""
+      }
     }
+
+    this.selectedElementChange.emit(this.selectedElement)
     this.isCreatingNewElement = true
     this.showDetails = true
   }
 
 
 
-  // Save through API
+  // SAVE ELEMENTS
   onNewElementSave = async() => {
+    if(this.selectedElement.name){
+      const { ...customColumn } = this.selectedElement
+      const colId = await this.saveNewCustomColumnAPI({...customColumn})
+      this.customColumns.push({node: {id: colId,...customColumn}})
+      return
+    }
+
     const customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
       return {
         customColumn: parentNode.node.customColumn.id,
         value: parentNode.node.value
       }
     })
+
     if(this.selectedElement.productName){
       // If element is product
       this.elements.forEach((parentNode)=> {
@@ -373,7 +436,7 @@ export class DashboardComponent implements OnInit {
       const { parent, customColumns, ...productDet } = this.selectedElement
       await this.saveNewProductAPI({...productDet, customColumns: customColumnsArr})
 
-      } else {
+    } else if(this.selectedElement.locationName) {
         // console.log('loookinn for loc with id ', this.selectedElement.parent)
         if(this.selectedElement.parent){
           // foreach root
@@ -393,8 +456,9 @@ export class DashboardComponent implements OnInit {
 
 
 
-
+// API CALLS
   saveNewProductAPI = async(productDetails: any) => {
+    console.log("Adding new prod", productDetails)
     // Create product
     const responseProduct = await apiFetch({
       query: `
@@ -473,6 +537,28 @@ export class DashboardComponent implements OnInit {
         // Update ID
         this.selectedElement.id = responseSub.data.data.createLocation.location.id
         this.selectedElementChange.emit(this.selectedElement);
+  }
+
+  saveNewCustomColumnAPI = async(customColumnDetails: any) => {
+    // Create product
+    const responseCustomColumn = await apiFetch({
+      query: `
+      mutation createCustomColumn($customColumnDetails: CustomColumnInput!){
+        createCustomColumn(customColumnDetails: $customColumnDetails){
+          customColumn{
+            id
+          }
+        }
+      }
+      `,
+      variables: {
+        customColumnDetails: customColumnDetails
+      }
+    })
+    // Update ID
+    this.selectedElement.id = responseCustomColumn.data.data.createCustomColumn.customColumn.id
+    this.selectedElementChange.emit(this.selectedElement);
+    return responseCustomColumn.data.data.createCustomColumn.customColumn.id
   }
 
   ngOnInit(): void {
