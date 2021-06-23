@@ -10,13 +10,39 @@ import { apiFetch } from 'src/common/api/api';
 })
 export class DashboardComponent implements OnInit {
   showDetails: boolean = false;
+  showColumnsManage: boolean = false;
   @Input() selectedElement: any;
   @Output() selectedElementChange = new EventEmitter();
   elements!: any[];
+  customColumns!: any[];
   isCreatingNewElement: boolean = false;
   searchingIn: any;
-
+  customColumnDataTypes = ['text', 'number', 'date']
   constructor() {}
+
+  //
+  // START QUERIES
+  //
+  queryCustomColumns = async() => {
+    const response = await apiFetch({
+      query: `
+      query listCustomColumns{
+        customColumnsList{
+          edges{
+            node{
+              id
+              name
+              dataType
+              elementsAllowed
+            }
+          }
+        }
+      }`
+    })
+    this.customColumns = response.data.data.customColumnsList.edges.map((parentNode: any)=>{
+      return {node: {...parentNode.node, show: true}}
+    })
+  }
 
   queryLocationsProducts = async() => {
     const response = await apiFetch({
@@ -25,11 +51,32 @@ export class DashboardComponent implements OnInit {
         id
         locationName
         description
+        customColumns{
+          edges{
+            node{
+              customColumn{
+                id
+              }
+              value
+            }
+          }
+        }
         products{
           edges{
             node{
               id
               productName
+              description
+              customColumns{
+                edges{
+                  node{
+                    customColumn{
+                      id
+                    }
+                    value
+                  }
+                }
+              }
             }
           }
         }
@@ -58,13 +105,85 @@ export class DashboardComponent implements OnInit {
         }
       }`
     })
+
     this.elements = response.data.data.locationsList.edges
   }
 
 
+
+
+  //
+  // CUSTOM COLUMNS
+  //
+  findCustomColumnValue = (customId: string, customValues: any) => {
+    const value: any =  customValues.find((parentNode: any)=> {
+       if (parentNode.node.customColumn.id === customId){
+        //  console.log(parentNode.node.value)updateCustomColumnModel
+         return parentNode.node.value
+       }
+    })
+    if(value){
+      return value.node.value
+    } else {
+      return null
+    }
+  }
+
+  findCustomColumnModel = (customId: string) => {
+    if(this.selectedElement.customColumns){
+      if(this.selectedElement.customColumns.edges){
+        const value = this.selectedElement.customColumns.edges.find((parentNode:any)=>{
+          return parentNode.node.customColumn.id === customId
+        })
+        if(value){
+          return value.node.value
+        }
+      }
+    }
+    return ""
+  }
+
+  updateCustomColumnModel = async(columnModelNode?: any, event?: any) => {
+    if(!this.selectedElement.customColumns){
+      this.selectedElement.customColumns.edges = [
+        {node:{
+          customColumn: {
+            id: columnModelNode.id,
+            name: columnModelNode.name
+          },
+          value: event
+        }}
+      ]
+      this.selectedElementChange.emit(this.selectedElement)
+    }
+
+      const value = this.selectedElement.customColumns.edges.find((parentNode:any)=>{
+        return parentNode.node.customColumn.id === columnModelNode.id
+      })
+      if(value){
+        value.node.value = event
+      } else {
+        console.log(columnModelNode)
+        this.selectedElement.customColumns.edges.push({node:{
+          customColumn: {
+            id: columnModelNode.id,
+            name: columnModelNode.name
+          },
+          value: event
+        }})
+      }
+    this.selectedElementChange.emit(this.selectedElement)
+  }
+
+
+
+
+  //
+  // RECURSIVE FUNCTIONS
+  //
+
   updateRecNested = (subType: string, element: any, parentId: string) => {
     if(this.searchingIn.id === parentId){
-      // console.log('Found in root!')
       if(this.searchingIn[subType].edges){
         this.searchingIn[subType].edges.push({node: element})
       } else {
@@ -85,14 +204,16 @@ export class DashboardComponent implements OnInit {
     // console.log('Lokkin at', this.searchingIn)
     if(subType==='childrens'){
       if(this.searchingIn.node === this.selectedElement){
-        console.log('Deleteing', this.searchingIn.node)
+        // console.log('Deleteing', this.searchingIn.node)
         delete this.searchingIn.node
         return true
       } else {
         if(this.searchingIn.node){
-          for (let parentNode of this.searchingIn.node.childrens.edges){
-            this.searchingIn = parentNode
-            this.deleteRecNested(subType)
+          if(this.searchingIn.node.childrens.edges){
+            for (let parentNode of this.searchingIn.node.childrens.edges){
+              this.searchingIn = parentNode
+              this.deleteRecNested(subType)
+            }
           }
         }
       }
@@ -110,8 +231,10 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  // Selection
+
+  // SELECT ELEMENT
   onElementSelect = (element: any) => {
+    this.showColumnsManage = false
     this.isCreatingNewElement = false
     this.showDetails = true;
     // console.log(element)
@@ -119,46 +242,86 @@ export class DashboardComponent implements OnInit {
     this.selectedElementChange.emit(this.selectedElement)
   }
 
-
-
-  // Update
-  onElementUpdate = async() => {
-    if(this.selectedElement.productName){
-      const { id, ...productDet } = this.selectedElement
-    // If element is product
-    const responseUpdate = await apiFetch({
-      query: `
-      mutation modProduct($id: String!, $productDetails: ProductInput!){
-        modifyProduct(id:$id, productDetails: $productDetails){
-          modified
-        }
-      }
-      `,
-      variables: {
-        id: this.selectedElement.id,
-        productDetails: productDet
-      }
-    })
+  // UPDATE CUSTOM COLUMN
+  onCustomColumnUpdate = (allowedType: string) => {
+    if(this.selectedElement.elementsAllowed.includes(allowedType)){
+      this.selectedElement.elementsAllowed = this.selectedElement.elementsAllowed.filter((allowedTypeLocal: string)=>{
+        return allowedTypeLocal !== allowedType
+      })
     } else {
-      const { childrens, id, products, ...locationDet } = this.selectedElement
+      this.selectedElement.elementsAllowed.push(allowedType)
+    }
+    this.onElementUpdate()
+  }
 
+
+  // UPDATE ELEMENT
+  onElementUpdate = async() => {
+    if(this.selectedElement.id){
+      let customColumnsArr
+      if(!this.selectedElement.name){
+        customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
+          return {
+            customColumn: parentNode.node.customColumn.id,
+            value: parentNode.node.value
+          }
+        })
+      }
+      if(this.selectedElement.productName){
+        const { id, customColumns, ...productDet } = this.selectedElement
+      // If element is product
       const responseUpdate = await apiFetch({
         query: `
-        mutation modLocation($id: String!, $locationDetails: LocationInput!){
-          modifyLocation(id:$id, locationDetails: $locationDetails){
+        mutation modProduct($id: String!, $productDetails: ProductInput!){
+          modifyProduct(id:$id, productDetails: $productDetails){
             modified
           }
         }
         `,
         variables: {
           id: this.selectedElement.id,
-          locationDetails: locationDet
+          productDetails: {...productDet, customColumns: customColumnsArr},
         }
       })
+      } else if(this.selectedElement.locationName){
+        const { customColumns, childrens, id, products, ...locationDet } = this.selectedElement
+
+        const responseUpdate = await apiFetch({
+          query: `
+          mutation modLocation($id: String!, $locationDetails: LocationInput!){
+            modifyLocation(id:$id, locationDetails: $locationDetails){
+              modified
+            }
+          }
+          `,
+          variables: {
+            id: this.selectedElement.id,
+            locationDetails: {...locationDet, customColumns: customColumnsArr},
+          }
+        })
+      } else if(this.selectedElement.name){
+        const { id, show, ...customColumnDetails } = this.selectedElement
+        const resp = await apiFetch({
+          query: `
+            mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
+              modifyCustomColumn(id:$id, customColumnDetails: $customColumnDetails){
+                customColumn{
+                  id
+                }
+              }
+            }
+            `,
+            variables: {
+              id: this.selectedElement.id,
+              customColumnDetails: customColumnDetails
+            }
+        })
+        console.log(resp)
+      }
     }
   }
 
-  // Delete
+  // DELETE ELEMENT
   onElementDelete = async() => {
     // console.log(this.elements)
     this.showDetails = false
@@ -177,7 +340,7 @@ export class DashboardComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
-    } else {
+    } else if(this.selectedElement.childrens){
       this.deleteRecNested('childrens')
       const responseDelLoc = await apiFetch({
         query: `
@@ -191,16 +354,39 @@ export class DashboardComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
+    } else if(this.selectedElement.name) {
+      this.customColumns = this.customColumns.filter((column: any)=>{
+        return column.node.id !== this.selectedElement.id
+      })
+      const responseDelCustomColumn = await apiFetch({
+        query: `
+        mutation deleteCustomColumn($id: ID!){
+          deleteCustomColumn(id: $id){
+              deleted
+          }
+        }
+        `,
+        variables: {
+          id: this.selectedElement.id
+        }
+      })
     }
   }
 
-  // Create
+  // CREATE ELEMENT
   onNewElementInit = async(elementType: string, parentId?: string) => {
     if(elementType === 'location'){
       this.selectedElement = {
         parent: parentId,
         locationName: '',
+        description: '',
         childrens: {
+          edges: []
+        },
+        products: {
+          edges: []
+        },
+        customColumns: {
           edges: []
         }
       }
@@ -208,34 +394,56 @@ export class DashboardComponent implements OnInit {
         this.selectedElement.root = true
         delete this.selectedElement.parent
       }
-      console.log("creating new element:", this.selectedElement)
-      this.selectedElementChange.emit(this.selectedElement)
-    }
-    if(elementType === 'product'){
+    } else if(elementType === 'product'){
       this.selectedElement = {
         parent: parentId,
         productName: '',
+        description: '',
+        customColumns: {
+          edges: []
+        }
       }
-      this.selectedElementChange.emit(this.selectedElement)
+    } else if(elementType==='customColumn'){
+      this.selectedElement = {
+        name: "",
+        elementsAllowed: [],
+        dataType: ""
+      }
     }
+
+    this.selectedElementChange.emit(this.selectedElement)
     this.isCreatingNewElement = true
     this.showDetails = true
   }
 
 
 
-  // Save through API
+  // SAVE ELEMENTS
   onNewElementSave = async() => {
+    if(this.selectedElement.name){
+      const { show, ...customColumn } = this.selectedElement
+      const colId = await this.saveNewCustomColumnAPI({...customColumn})
+      this.customColumns.push({node: {id: colId,...customColumn}})
+      return
+    }
+
+    const customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
+      return {
+        customColumn: parentNode.node.customColumn.id,
+        value: parentNode.node.value
+      }
+    })
+
     if(this.selectedElement.productName){
       // If element is product
       this.elements.forEach((parentNode)=> {
         this.searchingIn = parentNode.node
         this.updateRecNested('products', this.selectedElement, this.selectedElement.parent)
       })
-      const { parent, ...productDet } = this.selectedElement
-      await this.saveNewProductAPI(productDet)
+      const { parent, customColumns, ...productDet } = this.selectedElement
+      await this.saveNewProductAPI({...productDet, customColumns: customColumnsArr})
 
-      } else {
+    } else if(this.selectedElement.locationName) {
         // console.log('loookinn for loc with id ', this.selectedElement.parent)
         if(this.selectedElement.parent){
           // foreach root
@@ -247,16 +455,17 @@ export class DashboardComponent implements OnInit {
           this.elements.push({node: this.selectedElement})
         }
 
-        const { parent, childrens, ...locationDet } = this.selectedElement
-        await this.saveNewSubLocationAPI(locationDet)
+        const { parent, childrens, products, customColumns, ...locationDet } = this.selectedElement
+        await this.saveNewSubLocationAPI({...locationDet, customColumns: customColumnsArr})
       }
     this.isCreatingNewElement = false
   }
 
 
 
-
+// API CALLS
   saveNewProductAPI = async(productDetails: any) => {
+    console.log("Adding new prod", productDetails)
     // Create product
     const responseProduct = await apiFetch({
       query: `
@@ -296,7 +505,7 @@ export class DashboardComponent implements OnInit {
   }
 
   saveNewSubLocationAPI = async(locationDetails: any) => {
-        console.log("Saving new location", this.selectedElement)
+        console.log("Saving new location", locationDetails)
         // Create sub location
         const responseSub = await apiFetch({
           query: `
@@ -337,7 +546,30 @@ export class DashboardComponent implements OnInit {
         this.selectedElementChange.emit(this.selectedElement);
   }
 
+  saveNewCustomColumnAPI = async(customColumnDetails: any) => {
+    // Create product
+    const responseCustomColumn = await apiFetch({
+      query: `
+      mutation createCustomColumn($customColumnDetails: CustomColumnInput!){
+        createCustomColumn(customColumnDetails: $customColumnDetails){
+          customColumn{
+            id
+          }
+        }
+      }
+      `,
+      variables: {
+        customColumnDetails: customColumnDetails
+      }
+    })
+    // Update ID
+    this.selectedElement.id = responseCustomColumn.data.data.createCustomColumn.customColumn.id
+    this.selectedElementChange.emit(this.selectedElement);
+    return responseCustomColumn.data.data.createCustomColumn.customColumn.id
+  }
+
   ngOnInit(): void {
     this.queryLocationsProducts();
+    this.queryCustomColumns();
   }
 }
