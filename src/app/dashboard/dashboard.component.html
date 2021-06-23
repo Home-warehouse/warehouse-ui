@@ -1,4 +1,4 @@
-<h1 class="is-size-2 my-6">Dashboard</h1>
+<h1 class="is-size-2 my-6">Locations</h1>
 
 <!-- Elements -->
 <div class="columns horizontal">
@@ -6,11 +6,19 @@
     <table class="table">
       <thead>
         <tr>
-          <th><input type="checkbox"></th>
-          <th>Name</th>
-          <th *ngFor="let customColumnParentNode of customColumns" (click)="onElementSelect(customColumnParentNode.node)">
-            {{customColumnParentNode.node.name}}
+          <th>
+            <label class="checkbox">
+              <input type="checkbox">
+            </label>
           </th>
+          <th>Name</th>
+          <ng-container *ngFor="let customColumnParentNode of customColumns"
+            (click)="onElementSelect(customColumnParentNode.node)">
+            <th [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
+              (click)="onElementSelect(customColumnParentNode.node)" *ngIf="customColumnParentNode.node.show">
+              {{customColumnParentNode.node.name}}
+            </th>
+          </ng-container>
           <th>Actions</th>
           <th (click)="onNewElementInit('customColumn')"><i class="ph-plus"></i>Add column</th>
         </tr>
@@ -23,91 +31,137 @@
         Location</button>
     </table>
   </div>
-  <!-- Details -->
+
+
   <div class="column is-12-mobile is-5-tablet is-4-widescreen is-offset-1-widescreen is-4-fullhd is-offset-1-fullhd">
+
+    <!-- Manage columns -->
+    <div class="mb-6 is-flex is-justify-content-flex-end">
+      <button class="button"
+        (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null">Manage
+        columns</button>
+    </div>
+    <div *ngIf="showColumnsManage">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let customColumnParentNode of customColumns">
+            <td>{{customColumnParentNode.node.name}}</td>
+            <td><button class="button is-small mx-2">Edit</button></td>
+            <td>
+              <ng-container *ngIf="customColumnParentNode.node.show; else hiddenCustomColumn">
+                <button class="button is-small mx-2" (click)="customColumnParentNode.node.show=false">Hide</button>
+              </ng-container>
+              <ng-template #hiddenCustomColumn>
+                <button class="button is-small mx-2" (click)="customColumnParentNode.node.show=true">Show</button>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Details -->
     <div *ngIf="showDetails">
       <!-- <p>{{selectedElement | json}}</p> -->
       <div class="is-flex is-justify-content-space-between">
         <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
         <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
       </div>
-      <h2 class="is-size-3">Details</h2>
+      <h2 class="is-size-3">
+        <ng-container *ngIf="isCreatingNewElement">New </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('locationName')">Location </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">Product </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('name')">Column </ng-container>
+        details
+      </h2>
       <div class="field">
         <label class="label">Name</label>
         <div class="control">
-          <input *ngIf="selectedElement.hasOwnProperty('locationName')" class="input" type="text" [(ngModel)]="selectedElement.locationName"  (focusout)="onElementUpdate()" />
-          <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text" [(ngModel)]="selectedElement.productName"  (focusout)="onElementUpdate()" />
-          <input *ngIf="selectedElement.hasOwnProperty('name')" class="input" type="text" [(ngModel)]="selectedElement.name"  (focusout)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('locationName')" class="input" type="text"
+            [(ngModel)]="selectedElement.locationName" (focusout)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text"
+            [(ngModel)]="selectedElement.productName" (focusout)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('name')" class="input" type="text"
+            [(ngModel)]="selectedElement.name" (focusout)="onElementUpdate()" />
         </div>
       </div>
 
       <!-- Only customColumns -->
-      <ng-container *ngIf="selectedElement.hasOwnProperty('name')" >
+      <ng-container *ngIf="selectedElement.hasOwnProperty('name')">
         <!-- Data type -->
         <div class="field">
           <label class="label">Data Type</label>
-          <div class="control">
-            <input class="input" type="text" [(ngModel)]="selectedElement.dataType"  (focusout)="onElementUpdate()" />
+          <div class="control" class="select">
+            <!-- <input class="input" type="text" [(ngModel)]="selectedElement.dataType"   /> -->
+            <select name="duration" [(ngModel)]="selectedElement.dataType" (focusout)="onElementUpdate()">
+              <option *ngFor="let customColumnDataType of customColumnDataTypes" [value]="customColumnDataType"
+                selected="selectedElement.dataType === customColumnDataType">
+                {{customColumnDataType}}</option>
+            </select>
           </div>
         </div>
         <!-- Allowed array -->
         <div class="field">
           <label class="label">Allowed elements</label>
           <div class="control">
-            <input type="checkbox"
-            [ngModel]="selectedElement.elementsAllowed.includes('locations')"
-            (ngModelChange)="onCustomColumnUpdate('locations')"
-            > Locations
-            <input type="checkbox"
-            [ngModel]="selectedElement.elementsAllowed.includes('products')"
-            (ngModelChange)="onCustomColumnUpdate('products')"
-            > Products
+            <label class="checkbox mx-2">
+              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('locations')"
+                (ngModelChange)="onCustomColumnUpdate('locations')"> Locations
+            </label>
+            <label class="checkbox mx-2">
+              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('products')"
+                (ngModelChange)="onCustomColumnUpdate('products')"> Products
+            </label>
           </div>
         </div>
       </ng-container>
 
 
       <ng-container *ngIf="!selectedElement.hasOwnProperty('name')">
-      <!-- Description -->
-      <div class="field">
-        <label class="label">Description</label>
-        <div class="control">
-          <textarea class="textarea has-fixed-size" [(ngModel)]="selectedElement.description" (focusout)="onElementUpdate()">
+        <!-- Description -->
+        <div class="field">
+          <label class="label">Description</label>
+          <div class="control">
+            <textarea class="textarea has-fixed-size" [(ngModel)]="selectedElement.description"
+              (focusout)="onElementUpdate()">
         </textarea>
+          </div>
         </div>
-      </div>
 
-      <!-- Custom Columns -->
-      <div class="my-5">
-      <h3 class="is-size-4">Custom Columns</h3>
-      <div class="field" *ngFor="let customColumnParentNode of customColumns">
-        <ng-container
-        *ngIf="
+        <!-- Custom Columns -->
+        <div class="my-5">
+          <h3 class="is-size-4">Custom Columns</h3>
+          <div class="field" *ngFor="let customColumnParentNode of customColumns">
+            <ng-container *ngIf="
         selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('products') ||
         selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('locations')
       ">
-        <label class="label">{{customColumnParentNode.node.name}}</label>
-        <div class="control">
-          <input
-          class="input"
-          type="text"
-          [ngModel]="findCustomColumnModel(customColumnParentNode.node.id)"
-          (ngModelChange)="updateCustomColumnModel(customColumnParentNode.node, $event)"
-          (focusout)="onElementUpdate()"
-          />
+              <label class="label">{{customColumnParentNode.node.name}}</label>
+              <div class="control">
+                <input class="input"
+                  type="{{customColumnParentNode.node.dataType}}"
+                  [ngModel]="findCustomColumnModel(customColumnParentNode.node.id)"
+                  (ngModelChange)="updateCustomColumnModel(customColumnParentNode.node, $event)"
+                  (focusout)="onElementUpdate()" />
+              </div>
+            </ng-container>
+          </div>
         </div>
-        </ng-container>
+      </ng-container>
+      <div class="my-4">
+        <!-- Actions -->
+        <button *ngIf="selectedElement.hasOwnProperty('parent') || isCreatingNewElement" class="button is-primary"
+          (click)="onNewElementSave()">Add new element</button>
+        <button *ngIf="!isCreatingNewElement" class="button is-danger" (click)="onElementDelete()">Delete
+          element</button>
       </div>
     </div>
-    </ng-container>
-    <div class="my-4">
-    <!-- Actions -->
-      <button *ngIf="selectedElement.hasOwnProperty('parent') || isCreatingNewElement" class="button is-primary"
-        (click)="onNewElementSave()">Add new element</button>
-      <button *ngIf="!isCreatingNewElement" class="button is-danger" (click)="onElementDelete()">Delete
-        element</button>
-    </div>
-  </div>
   </div>
 </div>
 
@@ -120,14 +174,19 @@
 <ng-template #productsListTmpl let-list="productsList" let-i="index">
   <!-- Products row -->
   <tr *ngFor="let parentNode of list" [ngClass]="{'is-selected': selectedElement==parentNode.node}">
-    <td (click)="onElementSelect(parentNode.node)"><input type="checkbox"></td>
+    <td (click)="onElementSelect(parentNode.node)">
+      <label class="checkbox">
+        <input type="checkbox">
+      </label>
+    </td>
     <td (click)="onElementSelect(parentNode.node)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
     </td>
-    <td *ngFor="let customColumnParentNode of customColumns">
-      {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
-      <!-- Find in parentNode.node.customColumns.edges (only if allowed_elements contains "products" )  -->
-    </td>
+    <ng-container *ngFor="let customColumnParentNode of customColumns">
+      <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
+        {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
+      </td>
+    </ng-container>
     <td></td>
   </tr>
 </ng-template>
@@ -140,17 +199,20 @@
       <tr
         [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
         <td (click)="onElementSelect(parentNode.node)">
-          <div class="my-2"><input type="checkbox"></div>
+          <div class="my-2">
+          <label class="checkbox">
+            <input type="checkbox">
+          </label>
+        </div>
         </td>
         <td (click)="onElementSelect(parentNode.node)">
           <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{parentNode.node.locationName}}</p>
         </td>
-        <td *ngFor="let customColumnParentNode of customColumns">
-          <ng-container *ngIf="parentNode.node.hasOwnProperty('customColumns')">
+        <ng-container *ngFor="let customColumnParentNode of customColumns">
+          <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
             {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
-            <!-- Find in parentNode.node.customColumns.edges (only if allowed_elements contains "products" )  -->
-          </ng-container>
-        </td>
+          </td>
+        </ng-container>
         <td>
           <button class="button is-small is-warning is-light mx-1  mt-1"
             (click)="onNewElementInit('product', parentNode.node.id)">Add Product</button>

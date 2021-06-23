@@ -10,13 +10,14 @@ import { apiFetch } from 'src/common/api/api';
 })
 export class DashboardComponent implements OnInit {
   showDetails: boolean = false;
+  showColumnsManage: boolean = false;
   @Input() selectedElement: any;
   @Output() selectedElementChange = new EventEmitter();
   elements!: any[];
   customColumns!: any[];
   isCreatingNewElement: boolean = false;
   searchingIn: any;
-
+  customColumnDataTypes = ['text', 'number', 'date']
   constructor() {}
 
   //
@@ -38,7 +39,9 @@ export class DashboardComponent implements OnInit {
         }
       }`
     })
-    this.customColumns = response.data.data.customColumnsList.edges
+    this.customColumns = response.data.data.customColumnsList.edges.map((parentNode: any)=>{
+      return {node: {...parentNode.node, show: true}}
+    })
   }
 
   queryLocationsProducts = async() => {
@@ -63,6 +66,7 @@ export class DashboardComponent implements OnInit {
             node{
               id
               productName
+              description
               customColumns{
                 edges{
                   node{
@@ -230,6 +234,7 @@ export class DashboardComponent implements OnInit {
 
   // SELECT ELEMENT
   onElementSelect = (element: any) => {
+    this.showColumnsManage = false
     this.isCreatingNewElement = false
     this.showDetails = true;
     // console.log(element)
@@ -295,7 +300,7 @@ export class DashboardComponent implements OnInit {
           }
         })
       } else if(this.selectedElement.name){
-        const { id, ...customColumnDetails } = this.selectedElement
+        const { id, show, ...customColumnDetails } = this.selectedElement
         const resp = await apiFetch({
           query: `
             mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
@@ -374,6 +379,7 @@ export class DashboardComponent implements OnInit {
       this.selectedElement = {
         parent: parentId,
         locationName: '',
+        description: '',
         childrens: {
           edges: []
         },
@@ -392,6 +398,7 @@ export class DashboardComponent implements OnInit {
       this.selectedElement = {
         parent: parentId,
         productName: '',
+        description: '',
         customColumns: {
           edges: []
         }
@@ -414,7 +421,7 @@ export class DashboardComponent implements OnInit {
   // SAVE ELEMENTS
   onNewElementSave = async() => {
     if(this.selectedElement.name){
-      const { ...customColumn } = this.selectedElement
+      const { show, ...customColumn } = this.selectedElement
       const colId = await this.saveNewCustomColumnAPI({...customColumn})
       this.customColumns.push({node: {id: colId,...customColumn}})
       return
