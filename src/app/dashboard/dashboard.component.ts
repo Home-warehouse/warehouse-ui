@@ -2,6 +2,10 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { apiFetch } from 'src/common/api/api';
 // import { moveItemInArray, CdkDragDrop } from "@angular/cdk/drag-drop"
 
+interface sync {
+  status: 'synced' | 'pending' | 'error',
+  text: string
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -9,6 +13,10 @@ import { apiFetch } from 'src/common/api/api';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
+  synchronization: sync = {
+    status: "synced",
+    text: "Everything up to date."
+  }
   showDetails: boolean = false;
   showColumnsManage: boolean = false;
   @Input() selectedElement: any;
@@ -19,6 +27,32 @@ export class DashboardComponent implements OnInit {
   searchingIn: any;
   customColumnDataTypes = ['text', 'number', 'date']
   constructor() {}
+
+
+  // Synchronization display
+  startSync(text: string){
+      this.synchronization = {
+        status: "pending",
+        text: "Syncing: ".concat(text)
+      }
+  }
+  onSyncError(text: string){
+    setTimeout(()=>{
+      this.synchronization = {
+        status: "error",
+        text: "Could not sync: ".concat(text)
+      }
+    }, 750)
+  }
+  onSyncSuccess(){
+    setTimeout(()=>{
+      this.synchronization = {
+        status: "synced",
+        text: "Everything up to date."
+      }
+    }, 1000)
+  }
+
 
   //
   // START QUERIES
@@ -268,7 +302,9 @@ export class DashboardComponent implements OnInit {
         })
       }
       if(this.selectedElement.productName){
-        const { id, customColumns, ...productDet } = this.selectedElement
+      this.startSync(this.selectedElement.productName)
+
+      const { id, customColumns, ...productDet } = this.selectedElement
       // If element is product
       const responseUpdate = await apiFetch({
         query: `
@@ -283,7 +319,19 @@ export class DashboardComponent implements OnInit {
           productDetails: {...productDet, customColumns: customColumnsArr},
         }
       })
+
+      if(responseUpdate.status === 200){
+        if(responseUpdate.data.data.modifyProduct.modified){
+          this.onSyncSuccess()
+        }
+      } else {
+        this.onSyncError(this.selectedElement.productName)
+      }
+
       } else if(this.selectedElement.locationName){
+
+        // If element is location
+        this.startSync(this.selectedElement.locationName)
         const { customColumns, childrens, id, products, ...locationDet } = this.selectedElement
 
         const responseUpdate = await apiFetch({
@@ -299,15 +347,23 @@ export class DashboardComponent implements OnInit {
             locationDetails: {...locationDet, customColumns: customColumnsArr},
           }
         })
+        if(responseUpdate.status === 200){
+          if(responseUpdate.data.data.modifyLocation.modified){
+            this.onSyncSuccess()
+          }
+        } else {
+          this.onSyncError(this.selectedElement.locationName)
+        }
+
       } else if(this.selectedElement.name){
+        // If element is cutomColumn
+        this.startSync(this.selectedElement.name)
         const { id, show, ...customColumnDetails } = this.selectedElement
-        const resp = await apiFetch({
+        const responseUpdate = await apiFetch({
           query: `
             mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
               modifyCustomColumn(id:$id, customColumnDetails: $customColumnDetails){
-                customColumn{
-                  id
-                }
+                modified
               }
             }
             `,
@@ -316,7 +372,13 @@ export class DashboardComponent implements OnInit {
               customColumnDetails: customColumnDetails
             }
         })
-        console.log(resp)
+        if(responseUpdate.status === 200){
+          if(responseUpdate.data.data.modifyCustomColumn.modified){
+            this.onSyncSuccess()
+          }
+        } else {
+          this.onSyncError(this.selectedElement.name)
+        }
       }
     }
   }
