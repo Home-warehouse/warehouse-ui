@@ -35,12 +35,21 @@
 
   <div class="column is-12-mobile is-5-tablet is-4-widescreen is-offset-1-widescreen is-4-fullhd is-offset-1-fullhd">
 
-    <!-- Manage columns -->
-    <div class="mb-6 is-flex is-justify-content-flex-end">
-      <button class="button"
-        (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null">Manage
-        columns</button>
+    <!-- Additional functions -->
+    <div class="columns is-vcentered mb-4">
+      <div class="column is-offset-2 is-2">
+        <button class="button"
+          (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null">
+          Manage columns
+        </button>
+      </div>
+      <div class="column is-offset-2 is-4">
+        <!-- Synchronization status -->
+        <p class="has-text-grey">{{synchronization.text}}</p>
+      </div>
     </div>
+
+    <!-- Manage columns -->
     <div *ngIf="showColumnsManage">
       <table class="table">
         <thead>
@@ -84,11 +93,11 @@
         <label class="label">Name</label>
         <div class="control">
           <input *ngIf="selectedElement.hasOwnProperty('locationName')" class="input" type="text"
-            [(ngModel)]="selectedElement.locationName" (focusout)="onElementUpdate()" />
+            [(ngModel)]="selectedElement.locationName" (ngModelChange)="onElementUpdate()" />
           <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text"
-            [(ngModel)]="selectedElement.productName" (focusout)="onElementUpdate()" />
+            [(ngModel)]="selectedElement.productName" (ngModelChange)="onElementUpdate()" />
           <input *ngIf="selectedElement.hasOwnProperty('name')" class="input" type="text"
-            [(ngModel)]="selectedElement.name" (focusout)="onElementUpdate()" />
+            [(ngModel)]="selectedElement.name" (ngModelChange)="onElementUpdate()" />
         </div>
       </div>
 
@@ -99,7 +108,7 @@
           <label class="label">Data Type</label>
           <div class="control" class="select">
             <!-- <input class="input" type="text" [(ngModel)]="selectedElement.dataType"   /> -->
-            <select name="duration" [(ngModel)]="selectedElement.dataType" (focusout)="onElementUpdate()">
+            <select name="duration" [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
               <option *ngFor="let customColumnDataType of customColumnDataTypes" [value]="customColumnDataType"
                 selected="selectedElement.dataType === customColumnDataType">
                 {{customColumnDataType}}</option>
@@ -129,7 +138,7 @@
           <label class="label">Description</label>
           <div class="control">
             <textarea class="textarea has-fixed-size" [(ngModel)]="selectedElement.description"
-              (focusout)="onElementUpdate()">
+              (ngModelChange)="onElementUpdate()">
         </textarea>
           </div>
         </div>
@@ -144,11 +153,10 @@
       ">
               <label class="label">{{customColumnParentNode.node.name}}</label>
               <div class="control">
-                <input class="input"
-                  type="{{customColumnParentNode.node.dataType}}"
+                <input class="input" type="{{customColumnParentNode.node.dataType}}"
                   [ngModel]="findCustomColumnModel(customColumnParentNode.node.id)"
                   (ngModelChange)="updateCustomColumnModel(customColumnParentNode.node, $event)"
-                  (focusout)="onElementUpdate()" />
+                  (ngModelChange)="onElementUpdate()" />
               </div>
             </ng-container>
           </div>
@@ -200,10 +208,10 @@
         [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
         <td (click)="onElementSelect(parentNode.node)">
           <div class="my-2">
-          <label class="checkbox">
-            <input type="checkbox">
-          </label>
-        </div>
+            <label class="checkbox">
+              <input type="checkbox">
+            </label>
+          </div>
         </td>
         <td (click)="onElementSelect(parentNode.node)">
           <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{parentNode.node.locationName}}</p>
