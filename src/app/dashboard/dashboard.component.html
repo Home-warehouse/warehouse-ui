@@ -38,8 +38,11 @@
     <!-- Additional functions -->
     <div class="columns is-vcentered mb-4">
       <div class="column is-offset-2 is-2">
-        <button class="button"
-          (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null">
+        <button
+          class="button is-link is-inverted"
+          (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null"
+          [ngClass]="{'is-light': showColumnsManage}"
+          >
           Manage columns
         </button>
       </div>
@@ -82,13 +85,16 @@
         <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
         <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
       </div>
-      <h2 class="is-size-3">
-        <ng-container *ngIf="isCreatingNewElement">New </ng-container>
-        <ng-container *ngIf="selectedElement.hasOwnProperty('locationName')">Location </ng-container>
-        <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">Product </ng-container>
+      <h4 class="is-size-4">
+        <ng-container *ngIf="isCreatingNewElement">Adding new </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('locationName')">
+          Location under {{parentLocationName}}
+        </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">
+          Product under {{parentLocationName}}
+        </ng-container>
         <ng-container *ngIf="selectedElement.hasOwnProperty('name')">Column </ng-container>
-        details
-      </h2>
+      </h4>
       <div class="field">
         <label class="label">Name</label>
         <div class="control">
@@ -179,19 +185,19 @@
 <!-- Templates -->
 
 <!-- Products -->
-<ng-template #productsListTmpl let-list="productsList" let-i="index">
+<ng-template #productsListTmpl let-list="productsList" let-i="index" let-parentLocationNameLocal="parentLocationNameLocal">
   <!-- Products row -->
   <tr *ngFor="let parentNode of list" [ngClass]="{'is-selected': selectedElement==parentNode.node}">
-    <td (click)="onElementSelect(parentNode.node)">
+    <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
       <label class="checkbox">
         <input type="checkbox">
       </label>
     </td>
-    <td (click)="onElementSelect(parentNode.node)">
+    <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
     </td>
     <ng-container *ngFor="let customColumnParentNode of customColumns">
-      <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
+      <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
         {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
       </td>
     </ng-container>
@@ -200,21 +206,24 @@
 </ng-template>
 
 <!-- Locations -->
-<ng-template #recursiveLocationsListTmpl let-list="locationsList" let-i="index">
+<ng-template #recursiveLocationsListTmpl let-list="locationsList" let-i="index" let-parentLocationNameLocal="parentLocationNameLocal">
   <ng-container *ngFor="let parentNode of list">
     <ng-container *ngIf="parentNode.hasOwnProperty('node')">
       <!-- Location row -->
       <tr
         [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
-        <td (click)="onElementSelect(parentNode.node)">
+        <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
           <div class="my-2">
             <label class="checkbox">
               <input type="checkbox">
             </label>
           </div>
         </td>
-        <td (click)="onElementSelect(parentNode.node)">
-          <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">{{parentNode.node.locationName}}</p>
+        <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
+          <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">
+            <ng-container *ngIf="i!==1"><i class="ph-arrow-bend-down-right"></i></ng-container>
+            {{parentNode.node.locationName}}
+          </p>
         </td>
         <ng-container *ngFor="let customColumnParentNode of customColumns">
           <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
@@ -223,22 +232,22 @@
         </ng-container>
         <td>
           <button class="button is-small is-warning is-light mx-1  mt-1"
-            (click)="onNewElementInit('product', parentNode.node.id)">Add Product</button>
+            (click)="onNewElementInit('product', parentNode.node.id, parentNode.node.locationName)">Add Product</button>
           <button *ngIf="i<80" class="button is-small is-info is-light mx-1 mt-1"
-            (click)="onNewElementInit('location', parentNode.node.id)">Add Location</button>
+            (click)="onNewElementInit('location', parentNode.node.id, parentNode.node.locationName)">Add Location</button>
         </td>
       </tr>
 
       <!-- Products -->
       <ng-container *ngIf="parentNode.node.hasOwnProperty('products')">
         <ng-container
-          *ngTemplateOutlet="productsListTmpl; context:{ productsList: parentNode.node.products.edges, index: i+10 }">
+          *ngTemplateOutlet="productsListTmpl; context:{ productsList: parentNode.node.products.edges, index: i+10, parentLocationNameLocal: parentNode.node.locationName }">
         </ng-container>
       </ng-container>
       <!-- SubLocations -->
       <ng-container *ngIf="parentNode.node.hasOwnProperty('childrens')">
         <ng-container
-          *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: parentNode.node.childrens.edges, index: i+40 }">
+          *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: parentNode.node.childrens.edges, index: i+40, parentLocationNameLocal: parentNode.node.locationName}">
         </ng-container>
       </ng-container>
     </ng-container>

@@ -15,7 +15,7 @@ interface sync {
 export class DashboardComponent implements OnInit {
   synchronization: sync = {
     status: "synced",
-    text: "Everything up to date."
+    text: "Everything is up to date."
   }
   showDetails: boolean = false;
   showColumnsManage: boolean = false;
@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   @Output() selectedElementChange = new EventEmitter();
   elements!: any[];
   customColumns!: any[];
+  parentLocationName: string | undefined = "";
   isCreatingNewElement: boolean = false;
   searchingIn: any;
   customColumnDataTypes = ['text', 'number', 'date']
@@ -48,7 +49,7 @@ export class DashboardComponent implements OnInit {
     setTimeout(()=>{
       this.synchronization = {
         status: "synced",
-        text: "Everything up to date."
+        text: "Everything is up to date."
       }
     }, 1000)
   }
@@ -152,7 +153,6 @@ export class DashboardComponent implements OnInit {
   findCustomColumnValue = (customId: string, customValues: any) => {
     const value: any =  customValues.find((parentNode: any)=> {
        if (parentNode.node.customColumn.id === customId){
-        //  console.log(parentNode.node.value)updateCustomColumnModel
          return parentNode.node.value
        }
     })
@@ -197,7 +197,6 @@ export class DashboardComponent implements OnInit {
       if(value){
         value.node.value = event
       } else {
-        console.log(columnModelNode)
         this.selectedElement.customColumns.edges.push({node:{
           customColumn: {
             id: columnModelNode.id,
@@ -225,20 +224,20 @@ export class DashboardComponent implements OnInit {
       }
       return
     }
-    this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
+    if(this.searchingIn.childrens){
+      this.searchingIn.childrens.edges.forEach((parentNode: any)=>{
         if(parentNode.node){
           this.searchingIn = parentNode.node
           this.updateRecNested(subType, element, parentId)
         }
     })
+    }
   }
 
 
   deleteRecNested = (subType: string) => {
-    // console.log('Lokkin at', this.searchingIn)
     if(subType==='childrens'){
       if(this.searchingIn.node === this.selectedElement){
-        // console.log('Deleteing', this.searchingIn.node)
         delete this.searchingIn.node
         return true
       } else {
@@ -267,11 +266,11 @@ export class DashboardComponent implements OnInit {
 
 
   // SELECT ELEMENT
-  onElementSelect = (element: any) => {
+  onElementSelect = (element: any, parentName?: string) => {
+    this.parentLocationName = parentName
     this.showColumnsManage = false
     this.isCreatingNewElement = false
     this.showDetails = true;
-    // console.log(element)
     this.selectedElement = element
     this.selectedElementChange.emit(this.selectedElement)
   }
@@ -385,7 +384,6 @@ export class DashboardComponent implements OnInit {
 
   // DELETE ELEMENT
   onElementDelete = async() => {
-    // console.log(this.elements)
     this.showDetails = false
     this.searchingIn = this.elements[0]
     if(this.selectedElement.productName){
@@ -436,7 +434,9 @@ export class DashboardComponent implements OnInit {
   }
 
   // CREATE ELEMENT
-  onNewElementInit = async(elementType: string, parentId?: string) => {
+  onNewElementInit = async(elementType: string, parentId?: string, parentName?: string) => {
+    this.showColumnsManage = false
+    parentName ? this.parentLocationName = parentName : this.parentLocationName = undefined;
     if(elementType === 'location'){
       this.selectedElement = {
         parent: parentId,
@@ -506,7 +506,7 @@ export class DashboardComponent implements OnInit {
       await this.saveNewProductAPI({...productDet, customColumns: customColumnsArr})
 
     } else if(this.selectedElement.locationName) {
-        // console.log('loookinn for loc with id ', this.selectedElement.parent)
+
         if(this.selectedElement.parent){
           // foreach root
           this.elements.forEach((parentNode)=> {
@@ -527,7 +527,7 @@ export class DashboardComponent implements OnInit {
 
 // API CALLS
   saveNewProductAPI = async(productDetails: any) => {
-    console.log("Adding new prod", productDetails)
+
     // Create product
     const responseProduct = await apiFetch({
       query: `
@@ -544,7 +544,7 @@ export class DashboardComponent implements OnInit {
       }
     })
 
-    console.log(responseProduct)
+
     // Update parent location
     const responseParent = await apiFetch({
       query: `
@@ -567,7 +567,6 @@ export class DashboardComponent implements OnInit {
   }
 
   saveNewSubLocationAPI = async(locationDetails: any) => {
-        console.log("Saving new location", locationDetails)
         // Create sub location
         const responseSub = await apiFetch({
           query: `
