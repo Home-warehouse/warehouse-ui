@@ -1,8 +1,8 @@
 <h1 class="is-size-2 my-6">Locations</h1>
-
-<!-- Elements -->
-<div class="columns horizontal">
-  <div class="column is-12-mobile is-7-tablet is-7-fullhd">
+<div class="columns ">
+  <!-- Elements -->
+  <div class="column is-12-mobile is-6-tablet is-8-widescreen is-7-fullhd">
+  <div style="overflow-x: auto;">
     <table class="table">
       <thead>
         <tr>
@@ -27,17 +27,19 @@
         <ng-container *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: locationsService.elements, index: 1 }">
         </ng-container>
       </tbody>
-      <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInit('location')">Add Root
-        Location</button>
     </table>
+  </div>
+  <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInit('location')">Add Root
+    Location</button>
   </div>
 
 
-  <div class="column is-12-mobile is-5-tablet is-4-widescreen is-offset-1-widescreen is-4-fullhd is-offset-1-fullhd">
+  <!-- Details -->
+  <div class="column is-12-mobile is-6-tablet is-4-widescreen is-4-fullhd is-offset-1-fullhd">
 
     <!-- Additional functions -->
     <div class="columns is-vcentered mb-4">
-      <div class="column is-offset-2 is-2">
+      <div class="column is-2-mobile">
         <button
           class="button is-link is-inverted"
           (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null"
@@ -46,7 +48,7 @@
           Manage columns
         </button>
       </div>
-      <div class="column is-offset-2 is-4">
+      <div class="column is-7-mobile is-offset-1-fullhd">
         <!-- Synchronization status -->
         <p class="has-text-grey">{{synchronization.text}}</p>
       </div>
@@ -85,16 +87,16 @@
         <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
         <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
       </div>
-      <h4 class="is-size-4">
+      <p>
         <ng-container *ngIf="isCreatingNewElement">Adding new </ng-container>
         <ng-container *ngIf="selectedElement.hasOwnProperty('locationName')">
-          Location under {{parentLocationName}}
+          Location <ng-container *ngIf="parentLocationName">under {{parentLocationName}}</ng-container>
         </ng-container>
         <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">
           Product under {{parentLocationName}}
         </ng-container>
         <ng-container *ngIf="selectedElement.hasOwnProperty('name')">Column </ng-container>
-      </h4>
+      </p>
       <div class="field">
         <label class="label">Name</label>
         <div class="control">
@@ -226,7 +228,7 @@
           </p>
         </td>
         <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns">
-          <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
+          <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
             {{customColumnsService.findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
           </td>
         </ng-container>
