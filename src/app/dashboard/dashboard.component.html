@@ -12,7 +12,7 @@
             </label>
           </th>
           <th>Name</th>
-          <ng-container *ngFor="let customColumnParentNode of customColumns"
+          <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns"
             (click)="onElementSelect(customColumnParentNode.node)">
             <th [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
               (click)="onElementSelect(customColumnParentNode.node)" *ngIf="customColumnParentNode.node.show">
@@ -24,7 +24,7 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: elements, index: 1 }">
+        <ng-container *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: locationsService.elements, index: 1 }">
         </ng-container>
       </tbody>
       <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInit('location')">Add Root
@@ -62,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let customColumnParentNode of customColumns">
+          <tr *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <td>{{customColumnParentNode.node.name}}</td>
             <td><button class="button is-small mx-2">Edit</button></td>
             <td>
@@ -149,19 +149,19 @@
           </div>
         </div>
 
-        <!-- Custom Columns -->
+        <!-- Custom Columns For locations and products -->
         <div class="my-5">
           <h3 class="is-size-4">Custom Columns</h3>
-          <div class="field" *ngFor="let customColumnParentNode of customColumns">
+          <div class="field" *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <ng-container *ngIf="
-        selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('products') ||
-        selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('locations')
-      ">
+              selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('products') ||
+              selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('locations')
+            ">
               <label class="label">{{customColumnParentNode.node.name}}</label>
               <div class="control">
                 <input class="input" type="{{customColumnParentNode.node.dataType}}"
-                  [ngModel]="findCustomColumnModel(customColumnParentNode.node.id)"
-                  (ngModelChange)="updateCustomColumnModel(customColumnParentNode.node, $event)"
+                  [ngModel]="customColumnsService.findCustomColumnModel(selectedElement, customColumnParentNode.node.id)"
+                  (ngModelChange)="customColumnsService.updateCustomColumnModel(selectedElement, customColumnParentNode.node, $event)"
                   (ngModelChange)="onElementUpdate()" />
               </div>
             </ng-container>
@@ -196,9 +196,9 @@
     <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
     </td>
-    <ng-container *ngFor="let customColumnParentNode of customColumns">
+    <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns">
       <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-        {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
+        {{customColumnsService.findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
       </td>
     </ng-container>
     <td></td>
@@ -225,9 +225,9 @@
             {{parentNode.node.locationName}}
           </p>
         </td>
-        <ng-container *ngFor="let customColumnParentNode of customColumns">
+        <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns">
           <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node)">
-            {{findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
+            {{customColumnsService.findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
           </td>
         </ng-container>
         <td>
