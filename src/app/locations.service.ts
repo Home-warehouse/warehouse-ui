@@ -8,7 +8,8 @@ export class LocationsService {
   elements!: any[];
 
 
-  queryLocations = async() => {
+  queryLocations = async(rootLocationId: string | null) => {
+
     const response = await apiFetch({
       query: `
       fragment locationFields on Location{
@@ -46,7 +47,7 @@ export class LocationsService {
         }
       }
       query locations{
-        locationsList(root_Exact: true){
+        locationsList(${rootLocationId === null ? "root_Exact: true" : ""}){
           edges{
             node{
               ...locationFields
