@@ -3,6 +3,24 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 import { apiFetch } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 
+enum sortByType {
+  Ascending = '1',
+  Descending = '-1'
+}
+
+enum filterByType {
+  Equal = '$eq',
+  Lesser = '$lt',
+  Greater = '$gt'
+}
+
+enum filterSuffixType {
+  Equal = 'to',
+  Lesser = 'than',
+  Greater = 'than'
+}
+
+
 @Component({
   selector: 'app-raport-form',
   templateUrl: './raport-form.component.html',
@@ -10,6 +28,9 @@ import getFormAsDict from 'src/common/form';
 })
 export class RaportFormComponent implements OnInit {
   RaportForm: FormGroup;
+  eSortByType = sortByType;
+  eFilterByType = filterByType;
+  eFilterSuffixType = filterSuffixType;
   locationsList!: {
     node: {
       id: string
@@ -27,42 +48,38 @@ export class RaportFormComponent implements OnInit {
     private fb: FormBuilder,
   ) {
     this.RaportForm = this.fb.group({
-      raportName: new FormControl('test', [Validators.required]),
-      description: new FormControl('te', []),
-      shortResults: new FormControl(4, [Validators.required, Validators.min(0), Validators.max(20)]),
-      rootLocation: new FormControl('Home', [Validators.required]),
-      customColumns: new FormControl('Typ Potrawy', [Validators.required]),
+      raportName: new FormControl('', [Validators.required]),
+      description: new FormControl('', []),
+      shortResults: new FormControl(5, [Validators.required, Validators.min(0), Validators.max(20)]),
+      // rootLocation: new FormControl(0, [Validators.required]),
+      showCustomColumns: new FormControl([], [Validators.required]),
       sortBy: this.fb.group({
         customColumn: new FormControl('', [Validators.required]),
-        by: new FormControl('', [Validators.required])
+        value: new FormControl(null, [Validators.required])
       }),
-      // filterBy: this.fb.array([
-      //   this.fb.group({
-      //     customColumn: [''],
-      //     by: ['']
-      //   })
-      // ])
+      filterBy: this.fb.array([])
     });
   }
 
   // Filters
-  // get allfilters(): FormArray {
-  //   return this.RaportForm.controls["filterBy"] as FormArray;
-  // }
+  get allfilters(): FormArray {
+    return this.RaportForm.controls["filterBy"] as FormArray;
+  }
 
-  // addFilter() {
-  //     let control = <FormArray>this.RaportForm.controls.filterBy;
-  //     control.push(
-  //       this.fb.group({
-  //         customColumn: [''],
-  //         by: ['']
-  //       })
-  //     )
-  // }
+  addFilter() {
+      let control = <FormArray>this.RaportForm.controls.filterBy;
+      control.push(
+        this.fb.group({
+          customColumn: [''],
+          comparison: [''],
+          value: [''],
+        })
+      )
+  }
 
-  // deleteFilter(filterIndex: number) {
-  //   this.allfilters.removeAt(filterIndex);
-  // }
+  deleteFilter(filterIndex: number) {
+    this.allfilters.removeAt(filterIndex);
+  }
 
   // Get all Locations
   getLocations = async() => {
@@ -100,29 +117,21 @@ export class RaportFormComponent implements OnInit {
     this.customColumnsList = response.data.data.customColumnsList.edges
   }
 
-  get sortBy(): string[] {
-    return [
-      "ASC",
-      "DSC"
-    ]
-  }
-
-
   onRaportSubmit = async() => {
     const formDict = getFormAsDict(this.RaportForm)
+    // delete formDict.description
+    // delete formDict.sortBy
+    // delete formDict.rootLocation
+    console.log(formDict)
     const mutation = await apiFetch({
-      query: `
-      mutation create_raport {
-        createRaport(raportDetails: {
-          ${JSON.stringify(formDict)}
-        })
-        {
+      query: `mutation create_raport($raportDetailsData: RaportInput!)  {
+        createRaport(raportDetails:$raportDetailsData){
           raport{
             id
           }
         }
-      }
-      `
+      }`,
+      variables: {raportDetailsData: formDict}
     })
   }
 

@@ -9,11 +9,11 @@ interface sync {
 }
 
 @Component({
-  selector: 'app-locations-table',
-  templateUrl: './locations-table.component.html',
-  styleUrls: ['./locations-table.component.scss'],
+  selector: 'app-locations-manager',
+  templateUrl: './locations-manager.component.html',
+  styleUrls: ['./locations-manager.component.scss']
 })
-export class LocationsTableComponent implements OnInit {
+export class LocationsManagerComponent implements OnInit {
   @Input() rootLocationId: string | null = null;
 
   synchronization: sync = {
@@ -25,7 +25,7 @@ export class LocationsTableComponent implements OnInit {
   isCreatingNewElement: boolean = false;
   showColumnsManage: boolean = false;
 
-  @Input() selectedElement: any;
+  @Input() selectedElement: any = null;
   @Output() selectedElementChange = new EventEmitter();
 
   parentLocationName: string | undefined = "";
@@ -64,14 +64,13 @@ export class LocationsTableComponent implements OnInit {
   }
 
 
-
   // SELECT ELEMENT
-  onElementSelect = (element: any, parentName?: string) => {
-    this.parentLocationName = parentName
+  onElementSelect = (config: {element: any, parentName?: string}) => {
+    this.parentLocationName = config.parentName
     this.showColumnsManage = false
     this.isCreatingNewElement = false
     this.showDetails = true;
-    this.selectedElement = element
+    this.selectedElement = config.element
     this.selectedElementChange.emit(this.selectedElement)
   }
 
@@ -233,13 +232,17 @@ export class LocationsTableComponent implements OnInit {
     }
   }
 
+  onNewElementInitEvent(elementType: string, parentId?: string, parentName?: string){
+    this.onNewElementInit({elementType, parentId, parentName})
+  }
+
   // CREATE ELEMENT
-  onNewElementInit = async(elementType: string, parentId?: string, parentName?: string) => {
+  onNewElementInit = async(config: {elementType: string, parentId?: string, parentName?: string}) => {
     this.showColumnsManage = false
-    parentName ? this.parentLocationName = parentName : this.parentLocationName = undefined;
-    if(elementType === 'location'){
+    config.parentName ? this.parentLocationName = config.parentName : this.parentLocationName = undefined;
+    if(config.elementType === 'location'){
       this.selectedElement = {
-        parent: parentId,
+        parent: config.parentId,
         locationName: '',
         description: '',
         childrens: {
@@ -252,24 +255,24 @@ export class LocationsTableComponent implements OnInit {
           edges: []
         }
       }
-      if(!parentId){
+      if(!config.parentId){
         this.selectedElement.root = true
         delete this.selectedElement.parent
       }
-    } else if(elementType === 'product'){
+    } else if(config.elementType === 'product'){
       this.selectedElement = {
-        parent: parentId,
+        parent: config.parentId,
         productName: '',
         description: '',
         customColumns: {
           edges: []
         }
       }
-    } else if(elementType==='customColumn'){
+    } else if(config.elementType==='customColumn'){
       this.selectedElement = {
         name: "",
         elementsAllowed: [],
-        dataType: ""
+        dataType: "",
       }
     }
 
@@ -281,11 +284,11 @@ export class LocationsTableComponent implements OnInit {
   // SAVE ELEMENTS
   onNewElementSave = async() => {
     if(this.selectedElement.name){
-      const { show, ...customColumn } = this.selectedElement
+      const {show, ...customColumn } = this.selectedElement
       const {id, selectedElement} = await this.customColumnsService.saveNewCustomColumnAPI(this.selectedElement, {...customColumn})
       this.selectedElement = selectedElement
       this.selectedElementChange.emit(this.selectedElement)
-      this.customColumnsService.customColumns.push({node: {id: id,...customColumn}})
+      this.customColumnsService.customColumns.push({node: {id: id,...customColumn, show: true}})
       return
     }
 
@@ -320,7 +323,6 @@ export class LocationsTableComponent implements OnInit {
       }
     this.isCreatingNewElement = false
   }
-
 
 
   ngOnInit(): void {

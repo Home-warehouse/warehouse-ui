@@ -5,8 +5,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class LocationsService {
-  elements!: any[];
-
+  elements: any[] = [];
 
   queryLocations = async(rootLocationId: string | null) => {
 

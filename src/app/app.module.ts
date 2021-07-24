@@ -13,8 +13,9 @@ import { HomePageComponent } from './home-page/home-page.component';
 import { AccountComponent } from './account/account.component';
 import { RaportComponent } from './raport/raport.component';
 import { RaportsListComponent } from './raports-list/raports-list.component';
-import { LocationsTableComponent } from './locations-table/locations-table.component';
+import { LocationsTableComponent } from './locations-manager/locations-table/locations-table.component';
 import { RaportFormComponent } from './raport-form/raport-form.component';
+import { LocationsManagerComponent } from './locations-manager/locations-manager.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { RaportFormComponent } from './raport-form/raport-form.component';
     RaportComponent,
     RaportsListComponent,
     LocationsTableComponent,
-    RaportFormComponent
+    RaportFormComponent,
+    LocationsManagerComponent,
   ],
   imports: [
     DragDropModule,

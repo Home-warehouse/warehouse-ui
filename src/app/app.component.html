@@ -13,7 +13,6 @@
       <p class="level-item" *ngIf="isLogged"><a routerLink="/dashboard" class="button is-primary is-inverted" routerLinkActive="is-light">Dashboard</a></p>
       <p class="level-item" *ngIf="isLogged"><a routerLink="/raports" class="button is-primary is-inverted" routerLinkActive="is-light">Raports</a></p>
       <p class="level-item" *ngIf="isLogged"><a routerLink="/account" class="button is-primary is-inverted" routerLinkActive="is-light">Account</a></p>
-      <p class="level-item" *ngIf="isLogged"><a routerLink="/create_raport" class="button is-primary is-inverted" routerLinkActive="is-light">create_raport</a></p>
       <p class="level-item" *ngIf="isLogged"><a (click)="logout()" class="button is-danger is-inverted">Logout</a></p>
       <p class="level-item" *ngIf="!isLogged"><a routerLink="/login" class="button is-info is-inverted" routerLinkActive="is-light">Login</a></p>
     </div>

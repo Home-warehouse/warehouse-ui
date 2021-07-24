@@ -1,37 +1,17 @@
-<div class="columns ">
+<div class="columns">
   <!-- Elements -->
   <div class="column is-12-mobile is-6-tablet is-8-widescreen is-7-fullhd">
-  <div style="overflow-x: auto;">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>
-            <label class="checkbox">
-              <input type="checkbox">
-            </label>
-          </th>
-          <th>Name</th>
-          <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns"
-            (click)="onElementSelect(customColumnParentNode.node)">
-            <th [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
-              (click)="onElementSelect(customColumnParentNode.node)" *ngIf="customColumnParentNode.node.show">
-              {{customColumnParentNode.node.name}}
-            </th>
-          </ng-container>
-          <th>Actions</th>
-          <th (click)="onNewElementInit('customColumn')"><i class="ph-plus"></i>Add column</th>
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: locationsService.elements, index: 1 }">
-        </ng-container>
-      </tbody>
-    </table>
-  </div>
-  <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInit('location')">Add Root
+    <app-locations-table
+    [customColumnsService]="customColumnsService"
+    [locationsService]="locationsService"
+    [selectedElement]="selectedElement"
+    (onElementSelect)="onElementSelect($event)"
+    (onNewElementInit)="onNewElementInit($event)"
+    >
+    </app-locations-table>
+  <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInitEvent('location')">Add Root
     Location</button>
   </div>
-
 
   <!-- Details -->
   <div class="column is-12-mobile is-6-tablet is-4-widescreen is-4-fullhd is-offset-1-fullhd">
@@ -83,7 +63,7 @@
     <div *ngIf="showDetails">
       <!-- <p>{{selectedElement | json}}</p> -->
       <div class="is-flex is-justify-content-space-between">
-        <small>ID {{selectedElement.id}} {{selectedElement?.newElement}}</small>
+        <small>ID {{selectedElement?.id}} {{selectedElement?.newElement}}</small>
         <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
       </div>
       <p>
@@ -179,78 +159,3 @@
     </div>
   </div>
 </div>
-
-
-
-
-<!-- Templates -->
-
-<!-- Products -->
-<ng-template #productsListTmpl let-list="productsList" let-i="index" let-parentLocationNameLocal="parentLocationNameLocal">
-  <!-- Products row -->
-  <tr *ngFor="let parentNode of list" [ngClass]="{'is-selected': selectedElement==parentNode.node}">
-    <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-      <label class="checkbox">
-        <input type="checkbox">
-      </label>
-    </td>
-    <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-      <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
-    </td>
-    <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns">
-      <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-        {{customColumnsService.findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
-      </td>
-    </ng-container>
-    <td></td>
-  </tr>
-</ng-template>
-
-<!-- Locations -->
-<ng-template #recursiveLocationsListTmpl let-list="locationsList" let-i="index" let-parentLocationNameLocal="parentLocationNameLocal">
-  <ng-container *ngFor="let parentNode of list">
-    <ng-container *ngIf="parentNode.hasOwnProperty('node')">
-      <!-- Location row -->
-      <tr
-        [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
-        <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-          <div class="my-2">
-            <label class="checkbox">
-              <input type="checkbox">
-            </label>
-          </div>
-        </td>
-        <td (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-          <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">
-            <ng-container *ngIf="i!==1"><i class="ph-arrow-bend-down-right"></i></ng-container>
-            {{parentNode.node.locationName}}
-          </p>
-        </td>
-        <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns">
-          <td *ngIf="customColumnParentNode.node.show" (click)="onElementSelect(parentNode.node, parentLocationNameLocal)">
-            {{customColumnsService.findCustomColumnValue(customColumnParentNode.node.id, parentNode.node.customColumns.edges)}}
-          </td>
-        </ng-container>
-        <td>
-          <button class="button is-small is-warning is-light mx-1  mt-1"
-            (click)="onNewElementInit('product', parentNode.node.id, parentNode.node.locationName)">Add Product</button>
-          <button *ngIf="i<80" class="button is-small is-info is-light mx-1 mt-1"
-            (click)="onNewElementInit('location', parentNode.node.id, parentNode.node.locationName)">Add Location</button>
-        </td>
-      </tr>
-
-      <!-- Products -->
-      <ng-container *ngIf="parentNode.node.hasOwnProperty('products')">
-        <ng-container
-          *ngTemplateOutlet="productsListTmpl; context:{ productsList: parentNode.node.products.edges, index: i+10, parentLocationNameLocal: parentNode.node.locationName }">
-        </ng-container>
-      </ng-container>
-      <!-- SubLocations -->
-      <ng-container *ngIf="parentNode.node.hasOwnProperty('childrens')">
-        <ng-container
-          *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: parentNode.node.childrens.edges, index: i+40, parentLocationNameLocal: parentNode.node.locationName}">
-        </ng-container>
-      </ng-container>
-    </ng-container>
-  </ng-container>
-</ng-template>

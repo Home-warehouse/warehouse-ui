@@ -17,7 +17,7 @@
   </div>
 
   <!-- Select root location of products that will be shown -->
-  <div class="field">
+  <!-- <div class="field">
     <label class="label"
       [ngClass]="{'has-text-danger': RaportForm.controls?.rootLocation?.invalid && RaportForm.controls?.rootLocation?.dirty}">
       Root Location*
@@ -29,7 +29,7 @@
         </option>
       </select>
     </div>
-  </div>
+  </div> -->
 
   <!-- short results -> amout of results displayed in raports-list -->
   <div class="field">
@@ -44,7 +44,7 @@
   <!-- which custom columns should be shown -->
   <div class="field">
     <label class="label">Show custom columns in raport*</label>
-    <select formControlName="customColumns" multiple>
+    <select formControlName="showCustomColumns" multiple>
       <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
         {{edges.node.name}}
       </option>
@@ -55,8 +55,7 @@
   <div class="field" formGroupName="sortBy">
     <label class="label">Sort by custom column*</label>
     Custom Column:
-    <div class="select"
-      [ngClass]="{'is-danger': RaportForm.controls?.customColumn?.invalid && RaportForm.controls?.customColumn?.dirty}">
+    <div class="select">
       <select formControlName="customColumn">
         <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
           {{edges.node.name}}
@@ -67,39 +66,43 @@
     <!-- Select how to sort -->
     Sorted:
     <div class="select">
-      <select formControlName="by">
-        <option *ngFor="let sort of sortBy; let i = index" [value]="sort">
-          {{sort}}
+      <select formControlName="value">
+        <option *ngFor="let type of eSortByType | keyvalue" [value]="type.value">
+          {{type.key}}
         </option>
       </select>
     </div>
   </div>
 
   <!-- filter by custom columns -->
-  <!-- <div formArrayName="allfilters">
+  <div formArrayName="filterBy">
     <label class="label">Raport Filters</label>
-    <div *ngFor="let filterByForm of allfilters.controls; let i = index">
+    <div *ngFor="let filterByForm of allfilters.controls; let i = index" [formGroupName]="i">
       <div class="control">
         <button class="button is-danger" (click)="deleteFilter(i)">Delete filter</button>
         Custom Column:
         <div class="select">
           <select formControlName="customColumn">
-            <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
+            <option *ngFor="let edges of customColumnsList; let k = index" [value]="customColumnsList[k].node.id">
               {{edges.node.name}}
             </option>
           </select>
         </div>
-        Filtered:
+        Compared by:
         <div class="select">
-          <select formControlName="by">
-            <option *ngFor="let filter of filterBy; let i = index" [value]="filter">
-              {{filter}}
+          <select formControlName="comparison">
+            <option *ngFor="let filter of eFilterByType | keyvalue" [value]="filter.value">
+              {{filter.key}}
             </option>
           </select>
         </div>
+        Compared to:
+        <input class="input" placeholder="to" formControlName="value" name="value">
       </div>
     </div>
   </div>
-  <button class="button is-primary" (click)="addFilter()"> New Filter</button> -->
+  <button class="button inverted" type="button" (click)="addFilter()">Add Filter</button>
+  <br/>
+  <br/>
   <input type="submit" [disabled]="!RaportForm.valid" class="button is-primary" value="Create/Modify">
 </form>
