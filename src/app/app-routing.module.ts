@@ -9,6 +9,7 @@ import { AccountComponent } from './account/account.component';
 import { RaportsListComponent } from './raports-list/raports-list.component';
 import { RaportComponent } from './raport/raport.component';
 import { RaportFormComponent } from './raport-form/raport-form.component';
+import { RaportDisplayComponent } from './raport-display/raport-display.component';
 
 const routes: Routes = [
   {path: '', component: HomePageComponent},
@@ -16,8 +17,8 @@ const routes: Routes = [
   {path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard]},
   {path: 'account', component: AccountComponent, canActivate: [AuthGuard]},
   // TODO: Add query parameters
-  {path: 'raport', component: RaportComponent, canActivate: [AuthGuard]},
-  {path: 'create_raport', component: RaportFormComponent, canActivate: [AuthGuard]},
+  {path: 'raport-display/:id', component: RaportDisplayComponent, canActivate: [AuthGuard]},
+  {path: 'create-raport', component: RaportFormComponent, canActivate: [AuthGuard]},
   {path: 'raports', component: RaportsListComponent, canActivate: [AuthGuard]},
   {path: 'home', component: HomePageComponent },
   {path: '**', redirectTo: '' }

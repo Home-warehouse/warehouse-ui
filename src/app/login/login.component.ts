@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { apiFetch } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
-import {Router} from "@angular/router"
+import { Router } from "@angular/router"
 import getFormAsDict from 'src/common/form';
 
 @Component({

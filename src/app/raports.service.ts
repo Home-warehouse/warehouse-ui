@@ -8,13 +8,18 @@ export class RaportsService {
   raportsList: any = [];
 
   constructor() { }
-  queryRaportsList = async() => {
+
+  queryRaportsList = async(id?: string | null) => {
     const response = await apiFetch({
       query: `
       query raport_list {
-        raportsList{
+        raportsList${id ? '(id_Exact:"'+id+'")' : ""}{
           edges{
             node{
+              id
+              raportName
+              description
+              shortResults
               sortBy{
                 value
                 customColumn{
@@ -32,8 +37,6 @@ export class RaportsService {
                   }
                 }
               }
-              raportName
-              description
               showCustomColumns{
                 edges{
                   node{
@@ -42,12 +45,12 @@ export class RaportsService {
                   }
                 }
               }
-              shortResults
             }
           }
         }
       }`
       })
+      console.log(response)
       return response
   }
 
@@ -55,6 +58,7 @@ export class RaportsService {
     this.raportsList=[]
     const parsedRaportInstructions = raportsListLocal.edges.map((parentNode:any)=>{
       return {
+        id: parentNode.node.id,
         name: parentNode.node.raportName,
         showCustomColumns: parentNode.node.showCustomColumns.edges.map((parentShowCustomColumnNode:any)=>{
           return {...parentShowCustomColumnNode.node}
@@ -113,6 +117,7 @@ export class RaportsService {
         }
       })
       raport = {
+          id: parsedRaportInstructions[index].id,
           raportName: parsedRaportInstructions[index].name,
           customColumns: parsedRaportInstructions[index].showCustomColumns,
           productsList: result.data.data.filterSortProducts
@@ -122,4 +127,21 @@ export class RaportsService {
     });
     console.log(this.raportsList)
   }
+
+  deleteRaport = async(id:string) => {
+    const result = await apiFetch({
+      query: `mutation delete_raport($id: ID!) {
+        deleteRaport(id: $id){
+          deleted
+        }
+      }
+      `,
+      variables: {
+        id
+      }
+    })
+    return result
+    console.log()
+  }
+
 }

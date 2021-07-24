@@ -1,0 +1,9 @@
+<ng-container *ngIf="raportsService.raportsList.length>0">
+  <h2 class="is-size-2">Raport - {{raportsService.raportsList[0].raportName}}</h2>
+  <button class="button is-small is-danger" (click)="onRaportDeletion(raportsService.raportsList[0].id)">Delete raport</button>
+  <app-raport
+          [customColumns]="raportsService.raportsList[0].customColumns"
+          [productsList]="raportsService.raportsList[0].productsList"
+  >
+</app-raport>
+</ng-container>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { apiFetch } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
+import { Router } from '@angular/router'
 
 enum sortByType {
   Ascending = '1',
@@ -45,6 +46,7 @@ export class RaportFormComponent implements OnInit {
   }[];
 
   constructor(
+    private router: Router,
     private fb: FormBuilder,
   ) {
     this.RaportForm = this.fb.group({
@@ -119,11 +121,7 @@ export class RaportFormComponent implements OnInit {
 
   onRaportSubmit = async() => {
     const formDict = getFormAsDict(this.RaportForm)
-    // delete formDict.description
-    // delete formDict.sortBy
-    // delete formDict.rootLocation
-    console.log(formDict)
-    const mutation = await apiFetch({
+    const result = await apiFetch({
       query: `mutation create_raport($raportDetailsData: RaportInput!)  {
         createRaport(raportDetails:$raportDetailsData){
           raport{
@@ -133,6 +131,7 @@ export class RaportFormComponent implements OnInit {
       }`,
       variables: {raportDetailsData: formDict}
     })
+    this.router.navigate(['/raport-display', result.data.data.createRaport.raport.id])
   }
 
   ngOnInit(): void {

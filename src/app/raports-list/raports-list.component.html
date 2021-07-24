@@ -1,5 +1,5 @@
 <h2 class="is-size-2">Raports</h2>
-<a routerLink="/create_raport" class="button is-primary is-inverted">Add new raport</a>
+<a routerLink="/create-raport" class="button is-primary is-inverted">Add new raport</a>
 
 <div class="columns">
     <ng-container *ngFor="let raport of raportsService.raportsList">
@@ -10,7 +10,7 @@
         [customColumns]="raport.customColumns"
         [productsList]="raport.productsList"
       ></app-raport>
-      <!-- <button class="button is-primary is-inverted">Show raport</button> -->
+      <a [routerLink]="['/raport-display/', raport.id]" class="button is-primary is-inverted">Show raport</a>
     </div>
     </div>
   </ng-container>

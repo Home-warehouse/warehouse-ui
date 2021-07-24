@@ -16,6 +16,7 @@ import { RaportsListComponent } from './raports-list/raports-list.component';
 import { LocationsTableComponent } from './locations-manager/locations-table/locations-table.component';
 import { RaportFormComponent } from './raport-form/raport-form.component';
 import { LocationsManagerComponent } from './locations-manager/locations-manager.component';
+import { RaportDisplayComponent } from './raport-display/raport-display.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { LocationsManagerComponent } from './locations-manager/locations-manager
     LocationsTableComponent,
     RaportFormComponent,
     LocationsManagerComponent,
+    RaportDisplayComponent,
   ],
   imports: [
     DragDropModule,

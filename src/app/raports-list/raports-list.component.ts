@@ -7,7 +7,6 @@ import { RaportsService } from '../raports.service';
   styleUrls: ['./raports-list.component.scss']
 })
 export class RaportsListComponent implements OnInit {
-  customColumns!: any[];
   constructor(
     public raportsService: RaportsService
   ) {}
