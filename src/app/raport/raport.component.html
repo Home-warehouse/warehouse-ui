@@ -1,0 +1,26 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <ng-container *ngFor="let customColumnParentNode of customColumns">
+        <th>
+          {{customColumnParentNode.name}}
+        </th>
+      </ng-container>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let product of productsList">
+      <td>
+        <p>{{product.productName}}</p>
+      </td>
+      <ng-container *ngFor="let customColumnParentNode of customColumns">
+        <td>
+          {{customColumnsService.findCustomColumnValue(customColumnParentNode.id,
+          product.customColumns.edges)}}
+        </td>
+      </ng-container>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

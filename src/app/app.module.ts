@@ -11,6 +11,12 @@ import { LoginComponent } from './login/login.component';
 import { NotificationsComponent } from './notifications/notifications.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { AccountComponent } from './account/account.component';
+import { RaportComponent } from './raport/raport.component';
+import { RaportsListComponent } from './raports-list/raports-list.component';
+import { LocationsTableComponent } from './locations-manager/locations-table/locations-table.component';
+import { RaportFormComponent } from './raport-form/raport-form.component';
+import { LocationsManagerComponent } from './locations-manager/locations-manager.component';
+import { RaportDisplayComponent } from './raport-display/raport-display.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +25,13 @@ import { AccountComponent } from './account/account.component';
     LoginComponent,
     NotificationsComponent,
     HomePageComponent,
-    AccountComponent
+    AccountComponent,
+    RaportComponent,
+    RaportsListComponent,
+    LocationsTableComponent,
+    RaportFormComponent,
+    LocationsManagerComponent,
+    RaportDisplayComponent,
   ],
   imports: [
     DragDropModule,

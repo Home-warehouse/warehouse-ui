@@ -1,0 +1,17 @@
+<h2 class="is-size-2">Raports</h2>
+<a routerLink="/create-raport" class="button is-primary is-inverted">Add new raport</a>
+
+<div class="columns">
+    <ng-container *ngFor="let raport of raportsService.raportsList">
+      <div class="column is-3">
+        <div class="box">
+        <h1 class="is-size-4">{{raport.raportName}}</h1>
+        <app-raport
+        [customColumns]="raport.customColumns"
+        [productsList]="raport.productsList"
+      ></app-raport>
+      <a [routerLink]="['/raport-display/', raport.id]" class="button is-primary is-inverted">Show raport</a>
+    </div>
+    </div>
+  </ng-container>
+</div>

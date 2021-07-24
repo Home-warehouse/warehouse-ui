@@ -1,0 +1,161 @@
+<div class="columns">
+  <!-- Elements -->
+  <div class="column is-12-mobile is-6-tablet is-8-widescreen is-7-fullhd">
+    <app-locations-table
+    [customColumnsService]="customColumnsService"
+    [locationsService]="locationsService"
+    [selectedElement]="selectedElement"
+    (onElementSelect)="onElementSelect($event)"
+    (onNewElementInit)="onNewElementInit($event)"
+    >
+    </app-locations-table>
+  <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInitEvent('location')">Add Root
+    Location</button>
+  </div>
+
+  <!-- Details -->
+  <div class="column is-12-mobile is-6-tablet is-4-widescreen is-4-fullhd is-offset-1-fullhd">
+
+    <!-- Additional functions -->
+    <div class="columns is-vcentered mb-4">
+      <div class="column is-2-mobile">
+        <button
+          class="button is-link is-inverted"
+          (click)="showColumnsManage = !showColumnsManage; showDetails = false; selectedElement=null"
+          [ngClass]="{'is-light': showColumnsManage}"
+          >
+          Manage columns
+        </button>
+      </div>
+      <div class="column is-7-mobile is-offset-1-fullhd">
+        <!-- Synchronization status -->
+        <p class="has-text-grey">{{synchronization.text}}</p>
+      </div>
+    </div>
+
+    <!-- Manage columns -->
+    <div *ngIf="showColumnsManage">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let customColumnParentNode of customColumnsService.customColumns">
+            <td>{{customColumnParentNode.node.name}}</td>
+            <td><button class="button is-small mx-2">Edit</button></td>
+            <td>
+              <ng-container *ngIf="customColumnParentNode.node.show; else hiddenCustomColumn">
+                <button class="button is-small mx-2" (click)="customColumnParentNode.node.show=false">Hide</button>
+              </ng-container>
+              <ng-template #hiddenCustomColumn>
+                <button class="button is-small mx-2" (click)="customColumnParentNode.node.show=true">Show</button>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Details -->
+    <div *ngIf="showDetails">
+      <!-- <p>{{selectedElement | json}}</p> -->
+      <div class="is-flex is-justify-content-space-between">
+        <small>ID {{selectedElement?.id}} {{selectedElement?.newElement}}</small>
+        <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
+      </div>
+      <p>
+        <ng-container *ngIf="isCreatingNewElement">Adding new </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('locationName')">
+          Location <ng-container *ngIf="parentLocationName">under {{parentLocationName}}</ng-container>
+        </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">
+          Product under {{parentLocationName}}
+        </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('name')">Column </ng-container>
+      </p>
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <input *ngIf="selectedElement.hasOwnProperty('locationName')" class="input" type="text"
+            [(ngModel)]="selectedElement.locationName" (ngModelChange)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text"
+            [(ngModel)]="selectedElement.productName" (ngModelChange)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('name')" class="input" type="text"
+            [(ngModel)]="selectedElement.name" (ngModelChange)="onElementUpdate()" />
+        </div>
+      </div>
+
+      <!-- Only customColumns -->
+      <ng-container *ngIf="selectedElement.hasOwnProperty('name')">
+        <!-- Data type -->
+        <div class="field">
+          <label class="label">Data Type</label>
+          <div class="control" class="select">
+            <!-- <input class="input" type="text" [(ngModel)]="selectedElement.dataType"   /> -->
+            <select name="duration" [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
+              <option *ngFor="let customColumnDataType of customColumnDataTypes" [value]="customColumnDataType"
+                selected="selectedElement.dataType === customColumnDataType">
+                {{customColumnDataType}}</option>
+            </select>
+          </div>
+        </div>
+        <!-- Allowed array -->
+        <div class="field">
+          <label class="label">Allowed elements</label>
+          <div class="control">
+            <label class="checkbox mx-2">
+              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('locations')"
+                (ngModelChange)="onCustomColumnUpdate('locations')"> Locations
+            </label>
+            <label class="checkbox mx-2">
+              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('products')"
+                (ngModelChange)="onCustomColumnUpdate('products')"> Products
+            </label>
+          </div>
+        </div>
+      </ng-container>
+
+
+      <ng-container *ngIf="!selectedElement.hasOwnProperty('name')">
+        <!-- Description -->
+        <div class="field">
+          <label class="label">Description</label>
+          <div class="control">
+            <textarea class="textarea has-fixed-size" [(ngModel)]="selectedElement.description"
+              (ngModelChange)="onElementUpdate()">
+        </textarea>
+          </div>
+        </div>
+
+        <!-- Custom Columns For locations and products -->
+        <div class="my-5">
+          <h3 class="is-size-4">Custom Columns</h3>
+          <div class="field" *ngFor="let customColumnParentNode of customColumnsService.customColumns">
+            <ng-container *ngIf="
+              selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('products') ||
+              selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('locations')
+            ">
+              <label class="label">{{customColumnParentNode.node.name}}</label>
+              <div class="control">
+                <input class="input" type="{{customColumnParentNode.node.dataType}}"
+                  [ngModel]="customColumnsService.findCustomColumnModel(selectedElement, customColumnParentNode.node.id)"
+                  (ngModelChange)="customColumnsService.updateCustomColumnModel(selectedElement, customColumnParentNode.node, $event)"
+                  (ngModelChange)="onElementUpdate()" />
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+      <div class="my-4">
+        <!-- Actions -->
+        <button *ngIf="selectedElement.hasOwnProperty('parent') || isCreatingNewElement" class="button is-primary"
+          (click)="onNewElementSave()">Add new element</button>
+        <button *ngIf="!isCreatingNewElement" class="button is-danger" (click)="onElementDelete()">Delete
+          element</button>
+      </div>
+    </div>
+  </div>
+</div>

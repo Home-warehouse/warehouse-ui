@@ -1,0 +1,108 @@
+<form [formGroup]="RaportForm" (ngSubmit)="onRaportSubmit()">
+  <!-- Name -->
+  <div class="field">
+    <label class="label">Raport Name*</label>
+    <div class="control">
+      <input class="input" placeholder="Raport Name" formControlName="raportName" name="raportName"
+        [ngClass]="{'is-danger': RaportForm.controls?.raportName?.invalid && RaportForm.controls?.raportName?.dirty}">
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="field">
+    <label class="label">Description</label>
+    <textarea class="textarea has-fixed-size" placeholder="Description" formControlName="description" name="description"
+      [ngClass]="{'is-danger': RaportForm.controls?.description?.invalid && RaportForm.controls?.description?.dirty}">
+    </textarea>
+  </div>
+
+  <!-- Select root location of products that will be shown -->
+  <!-- <div class="field">
+    <label class="label"
+      [ngClass]="{'has-text-danger': RaportForm.controls?.rootLocation?.invalid && RaportForm.controls?.rootLocation?.dirty}">
+      Root Location*
+    </label>
+    <div class="select">
+      <select formControlName="rootLocation">
+        <option *ngFor="let edges of locationsList; let i = index" [value]="locationsList[i].node.id">
+          {{edges.node.locationName}}
+        </option>
+      </select>
+    </div>
+  </div> -->
+
+  <!-- short results -> amout of results displayed in raports-list -->
+  <div class="field">
+    <label class="label">Amount of results in short*</label>
+    <div class="control">
+      <input class="input" type="number" min=0 max=20 placeholder="Short results" formControlName="shortResults"
+        name="raportName"
+        [ngClass]="{'is-danger': RaportForm.controls?.shortResults?.invalid && RaportForm.controls?.shortResults?.dirty}">
+    </div>
+  </div>
+
+  <!-- which custom columns should be shown -->
+  <div class="field">
+    <label class="label">Show custom columns in raport*</label>
+    <select formControlName="showCustomColumns" multiple>
+      <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
+        {{edges.node.name}}
+      </option>
+    </select>
+  </div>
+
+  <!-- sort by *single* custom column -->
+  <div class="field" formGroupName="sortBy">
+    <label class="label">Sort by custom column*</label>
+    Custom Column:
+    <div class="select">
+      <select formControlName="customColumn">
+        <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
+          {{edges.node.name}}
+        </option>
+      </select>
+    </div>
+    <!-- Select Column -->
+    <!-- Select how to sort -->
+    Sorted:
+    <div class="select">
+      <select formControlName="value">
+        <option *ngFor="let type of eSortByType | keyvalue" [value]="type.value">
+          {{type.key}}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- filter by custom columns -->
+  <div formArrayName="filterBy">
+    <label class="label">Raport Filters</label>
+    <div *ngFor="let filterByForm of allfilters.controls; let i = index" [formGroupName]="i">
+      <div class="control">
+        <button class="button is-danger" (click)="deleteFilter(i)">Delete filter</button>
+        Custom Column:
+        <div class="select">
+          <select formControlName="customColumn">
+            <option *ngFor="let edges of customColumnsList; let k = index" [value]="customColumnsList[k].node.id">
+              {{edges.node.name}}
+            </option>
+          </select>
+        </div>
+        Compared by:
+        <div class="select">
+          <select formControlName="comparison">
+            <option *ngFor="let filter of eFilterByType | keyvalue" [value]="filter.value">
+              {{filter.key}}
+            </option>
+          </select>
+        </div>
+        Compared to:
+        <input class="input" placeholder="to" formControlName="value" name="value">
+      </div>
+    </div>
+  </div>
+  <button class="button inverted" type="button" (click)="addFilter()">Add Filter</button>
+  <br/>
+  <br/>
+  <input type="submit" [disabled]="!RaportForm.valid" class="button is-primary" value="Create/Modify">
+</form>

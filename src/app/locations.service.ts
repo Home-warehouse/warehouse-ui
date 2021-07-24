@@ -5,10 +5,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class LocationsService {
-  elements!: any[];
+  elements: any[] = [];
 
+  queryLocations = async(rootLocationId: string | null) => {
 
-  queryLocations = async() => {
     const response = await apiFetch({
       query: `
       fragment locationFields on Location{
@@ -46,7 +46,7 @@ export class LocationsService {
         }
       }
       query locations{
-        locationsList(root_Exact: true){
+        locationsList(${rootLocationId === null ? "root_Exact: true" : ""}){
           edges{
             node{
               ...locationFields
