@@ -186,7 +186,9 @@ export class LocationsManagerComponent implements OnInit {
   onElementDelete = async() => {
     this.showDetails = false
     if(this.selectedElement.productName){
-      this.locationsService.deleteRecNested(this.locationsService.elements[0], this.selectedElement, 'products')
+      this.locationsService.elements.forEach((el: any)=>{
+        this.locationsService.deleteRecNested(el, this.selectedElement, 'products')
+      })
       const responseDelProd = await apiFetch({
         query: `
         mutation deleteProd($id: ID!){
@@ -200,7 +202,10 @@ export class LocationsManagerComponent implements OnInit {
         }
       })
     } else if(this.selectedElement.childrens){
-      this.locationsService.deleteRecNested(this.locationsService.elements[0], this.selectedElement, 'childrens')
+
+      this.locationsService.elements.forEach((el: any)=>{
+        this.locationsService.deleteRecNested(el, this.selectedElement, 'childrens')
+      })
       const responseDelLoc = await apiFetch({
         query: `
         mutation deleteLoc($id: ID!){
