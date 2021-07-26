@@ -201,8 +201,7 @@ export class LocationsManagerComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
-    } else if(this.selectedElement.childrens){
-
+    } else if(this.selectedElement.locationName){
       this.locationsService.elements.forEach((el: any)=>{
         this.locationsService.deleteRecNested(el, this.selectedElement, 'childrens')
       })

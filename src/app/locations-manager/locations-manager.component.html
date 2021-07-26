@@ -27,9 +27,11 @@
           Manage columns
         </button>
       </div>
-      <div class="column is-7-mobile is-offset-1-fullhd">
+      <div class="column is-7-mobile is-offset-1-fullhd is-flex">
         <!-- Synchronization status -->
-        <p class="has-text-grey">{{synchronization.text}}</p>
+        <p
+        [ngClass]="synchronization.status!='error' ? 'has-text-grey': 'has-text-danger'"
+        >{{synchronization.text}}</p>
       </div>
     </div>
 
