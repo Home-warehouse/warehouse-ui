@@ -84,7 +84,7 @@ export class LocationsService {
       }
       return
     }
-    if(searchingIn.childrens){
+    if(searchingIn.childrens?.edges){
       searchingIn.childrens.edges.forEach((parentNode: any)=>{
         if(parentNode.node){
           searchingIn = parentNode.node
@@ -100,12 +100,10 @@ export class LocationsService {
         delete searchingIn.node
         return true
       } else {
-        if(searchingIn.node){
-          if(searchingIn.node.childrens.edges){
-            for (let parentNode of searchingIn.node.childrens.edges){
-              searchingIn = parentNode
-              this.deleteRecNested(searchingIn, selectedElement, subType)
-            }
+        if(searchingIn.node?.childrens?.edges){
+          for (let parentNode of searchingIn.node.childrens.edges){
+            searchingIn = parentNode
+            this.deleteRecNested(searchingIn, selectedElement, subType)
           }
         }
       }

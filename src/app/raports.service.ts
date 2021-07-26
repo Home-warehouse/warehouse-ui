@@ -54,7 +54,7 @@ export class RaportsService {
       return response
   }
 
-  queryFilteredProductsList = async(raportsListLocal: any) => {
+  queryFilteredProductsList = async(raportsListLocal: any, noLimit?: boolean) => {
     this.raportsList=[]
     const parsedRaportInstructions = raportsListLocal.edges.map((parentNode:any)=>{
       return {
@@ -86,6 +86,16 @@ export class RaportsService {
     )
 
     raportsListParsed.forEach(async(raport: any, index:number) => {
+      let requestVariables: any = {
+        showCustomColumns: raportsListParsed[index].showCustomColumns,
+        sortBy: raportsListParsed[index].sortBy,
+        filterBy: raportsListParsed[index].filterBy,
+      }
+      if(!noLimit){
+        requestVariables.limit = raportsListParsed[index].limit
+      }
+
+
       const result = await apiFetch({
         query: `query filter_prods($showCustomColumns: [String]!, $sortBy: SortRaportInput!, $filterBy: [FilterRaportInput]!, $limit: Int) {
           filterSortProducts(
@@ -109,12 +119,7 @@ export class RaportsService {
           }
         }
         `,
-        variables: {
-          showCustomColumns: raportsListParsed[index].showCustomColumns,
-          sortBy: raportsListParsed[index].sortBy,
-          filterBy: raportsListParsed[index].filterBy,
-          limit: raportsListParsed[index].limit
-        }
+        variables: requestVariables
       })
       raport = {
           id: parsedRaportInstructions[index].id,
@@ -141,7 +146,6 @@ export class RaportsService {
       }
     })
     return result
-    console.log()
   }
 
 }
