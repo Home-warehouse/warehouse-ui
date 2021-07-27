@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 
 @Injectable({
   providedIn: 'root'
@@ -7,10 +7,12 @@ import { apiFetch } from 'src/common/api/api';
 export class RaportsService {
   raportsList: any = [];
 
-  constructor() { }
+  constructor(
+    private hwAPI: hwAPI
+  ) { }
 
   queryRaportsList = async(id?: string | null) => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `
       query raport_list {
         raportsList${id ? '(id_Exact:"'+id+'")' : ""}{
@@ -50,7 +52,6 @@ export class RaportsService {
         }
       }`
       })
-      console.log(response)
       return response
   }
 
@@ -96,7 +97,7 @@ export class RaportsService {
       }
 
 
-      const result = await apiFetch({
+      const result = await this.hwAPI.fetch({
         query: `query filter_prods($showCustomColumns: [String]!, $sortBy: SortRaportInput!, $filterBy: [FilterRaportInput]!, $limit: Int) {
           filterSortProducts(
             showCustomColumns: $showCustomColumns
@@ -130,11 +131,10 @@ export class RaportsService {
 
       this.raportsList.push(raport)
     });
-    console.log(this.raportsList)
   }
 
   deleteRaport = async(id:string) => {
-    const result = await apiFetch({
+    const result = await this.hwAPI.fetch({
       query: `mutation delete_raport($id: ID!) {
         deleteRaport(id: $id){
           deleted

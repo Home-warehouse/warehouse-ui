@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import { CustomColumnsService } from '../custom-columns.service';
 import { LocationsService } from '../locations.service';
 
@@ -31,10 +31,10 @@ export class LocationsManagerComponent implements OnInit {
   parentLocationName: string | undefined = "";
   customColumnDataTypes = ['text', 'number', 'date']
 
-
   constructor(
     public customColumnsService: CustomColumnsService,
-    public locationsService: LocationsService
+    public locationsService: LocationsService,
+    private hwAPI: hwAPI
   ) {}
 
 
@@ -103,7 +103,7 @@ export class LocationsManagerComponent implements OnInit {
 
       const { id, customColumns, ...productDet } = this.selectedElement
       // If element is product
-      const responseUpdate = await apiFetch({
+      const responseUpdate = await this.hwAPI.fetch({
         query: `
         mutation modProduct($id: String!, $productDetails: ProductInput!){
           modifyProduct(id:$id, productDetails: $productDetails){
@@ -132,7 +132,7 @@ export class LocationsManagerComponent implements OnInit {
         this.startSync(this.selectedElement.locationName)
         const { customColumns, childrens, id, products, ...locationDet } = this.selectedElement
 
-        const responseUpdate = await apiFetch({
+        const responseUpdate = await this.hwAPI.fetch({
           query: `
           mutation modLocation($id: String!, $locationDetails: LocationInput!){
             modifyLocation(id:$id, locationDetails: $locationDetails){
@@ -158,7 +158,7 @@ export class LocationsManagerComponent implements OnInit {
         // If element is cutomColumn
         this.startSync(this.selectedElement.name)
         const { id, show, ...customColumnDetails } = this.selectedElement
-        const responseUpdate = await apiFetch({
+        const responseUpdate = await this.hwAPI.fetch({
           query: `
             mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
               modifyCustomColumn(id:$id, customColumnDetails: $customColumnDetails){
@@ -189,7 +189,7 @@ export class LocationsManagerComponent implements OnInit {
       this.locationsService.elements.forEach((el: any)=>{
         this.locationsService.deleteRecNested(el, this.selectedElement, 'products')
       })
-      const responseDelProd = await apiFetch({
+      const responseDelProd = await this.hwAPI.fetch({
         query: `
         mutation deleteProd($id: ID!){
           deleteProduct(id: $id){
@@ -205,7 +205,7 @@ export class LocationsManagerComponent implements OnInit {
       this.locationsService.elements.forEach((el: any)=>{
         this.locationsService.deleteRecNested(el, this.selectedElement, 'childrens')
       })
-      const responseDelLoc = await apiFetch({
+      const responseDelLoc = await this.hwAPI.fetch({
         query: `
         mutation deleteLoc($id: ID!){
           deleteLocation(id: $id){
@@ -221,7 +221,7 @@ export class LocationsManagerComponent implements OnInit {
       this.customColumnsService.customColumns = this.customColumnsService.customColumns.filter((column: any)=>{
         return column.node.id !== this.selectedElement.id
       })
-      const responseDelCustomColumn = await apiFetch({
+      const responseDelCustomColumn = await this.hwAPI.fetch({
         query: `
         mutation deleteCustomColumn($id: ID!){
           deleteCustomColumn(id: $id){

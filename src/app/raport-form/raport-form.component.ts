@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 import { Router } from '@angular/router'
 
@@ -46,6 +46,7 @@ export class RaportFormComponent implements OnInit {
   }[];
 
   constructor(
+    private hwAPI: hwAPI,
     private router: Router,
     private fb: FormBuilder,
   ) {
@@ -85,7 +86,7 @@ export class RaportFormComponent implements OnInit {
 
   // Get all Locations
   getLocations = async() => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
     query: `
     query locations{
       locationsList{
@@ -103,7 +104,7 @@ export class RaportFormComponent implements OnInit {
 
   // Get all custom columns
   getCustomColumns = async() => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
     query: `
     query customColumns{
     customColumnsList{
@@ -121,7 +122,7 @@ export class RaportFormComponent implements OnInit {
 
   onRaportSubmit = async() => {
     const formDict = getFormAsDict(this.RaportForm)
-    const result = await apiFetch({
+    const result = await this.hwAPI.fetch({
       query: `mutation create_raport($raportDetailsData: RaportInput!)  {
         createRaport(raportDetails:$raportDetailsData){
           raport{

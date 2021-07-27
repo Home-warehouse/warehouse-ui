@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 import getFormAsDict from 'src/common/form';
 
@@ -15,6 +15,7 @@ export class AccountComponent implements OnInit {
   PasswordForm: FormGroup
   constructor(
     private fb: FormBuilder,
+    private hwAPI: hwAPI,
     private notifications: NotificationsSharedService,
   ) {
     this.AccountForm = this.fb.group({
@@ -29,7 +30,7 @@ export class AccountComponent implements OnInit {
   }
 
   getAccountData = async() =>{
-      const response = await apiFetch({
+      const response = await this.hwAPI.fetch({
         query: `
         query accDets {
           myAccount{
@@ -47,7 +48,7 @@ export class AccountComponent implements OnInit {
 
   onAccountDataUpdateSubmit = async()=>{
     let formDict = getFormAsDict(this.AccountForm)
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `mutation updateAcc($accountDetails: AccountInput!){
         modifyAccount(accountDetails: $accountDetails){
           modified
@@ -67,7 +68,7 @@ export class AccountComponent implements OnInit {
 
   onPasswordDataUpdateSubmit = async() => {
     let formDict = getFormAsDict(this.PasswordForm)
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `mutation updateAcc($accountDetails: AccountInput!, $oldPwd: String!){
         modifyAccount(accountDetails: $accountDetails, oldPassword: $oldPwd){
           modified
