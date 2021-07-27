@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 import { Router } from '@angular/router'
+import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 
 enum sortByType {
   Ascending = '1',
@@ -46,8 +47,10 @@ export class RaportFormComponent implements OnInit {
   }[];
 
   constructor(
+    private hwAPI: hwAPI,
     private router: Router,
     private fb: FormBuilder,
+    private notifications: NotificationsSharedService,
   ) {
     this.RaportForm = this.fb.group({
       raportName: new FormControl('', [Validators.required]),
@@ -85,7 +88,7 @@ export class RaportFormComponent implements OnInit {
 
   // Get all Locations
   getLocations = async() => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
     query: `
     query locations{
       locationsList{
@@ -103,7 +106,7 @@ export class RaportFormComponent implements OnInit {
 
   // Get all custom columns
   getCustomColumns = async() => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
     query: `
     query customColumns{
     customColumnsList{
@@ -121,7 +124,7 @@ export class RaportFormComponent implements OnInit {
 
   onRaportSubmit = async() => {
     const formDict = getFormAsDict(this.RaportForm)
-    const result = await apiFetch({
+    const result = await this.hwAPI.fetch({
       query: `mutation create_raport($raportDetailsData: RaportInput!)  {
         createRaport(raportDetails:$raportDetailsData){
           raport{
@@ -131,7 +134,20 @@ export class RaportFormComponent implements OnInit {
       }`,
       variables: {raportDetailsData: formDict}
     })
-    this.router.navigate(['/raport-display', result.data.data.createRaport.raport.id])
+    if(result.data){
+      if(result.data.data.createRaport.raport.id){
+        this.notifications.sendOpenNotificationEvent({
+          message: `Raport created! Now you will be redirected to new raport.`,
+          type: 'SUCCESS'
+        });
+        this.router.navigate(['/raport-display', result.data.data.createRaport.raport.id])
+      } else {
+        this.notifications.sendOpenNotificationEvent({
+          message: `Could not create raport - try again or ask administrator for further help`,
+          type: 'ERROR'
+        });
+      }
+    }
   }
 
   ngOnInit(): void {

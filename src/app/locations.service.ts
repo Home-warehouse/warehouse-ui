@@ -1,4 +1,4 @@
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -6,10 +6,12 @@ import { Injectable } from '@angular/core';
 })
 export class LocationsService {
   elements: any[] = [];
-
+  constructor(
+    private hwAPI: hwAPI
+  ) { }
   queryLocations = async(rootLocationId: string | null) => {
 
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `
       fragment locationFields on Location{
         id
@@ -126,7 +128,7 @@ export class LocationsService {
   saveNewProductAPI = async(selectedElement:any, productDetails: any) => {
 
     // Create product
-    const responseProduct = await apiFetch({
+    const responseProduct = await this.hwAPI.fetch({
       query: `
       mutation createProd($productDetails: ProductInput!){
         createProduct(productDetails: $productDetails){
@@ -143,7 +145,7 @@ export class LocationsService {
 
 
     // Update parent location
-    const responseParent = await apiFetch({
+    const responseParent = await this.hwAPI.fetch({
       query: `
       mutation modLocation($parent_id: String!, $product_id: ID!){
         modifyLocation(id:$parent_id, locationDetails: {products: [$product_id]}){
@@ -164,7 +166,7 @@ export class LocationsService {
 
   saveNewSubLocationAPI = async(selectedElement:any, locationDetails: any) => {
         // Create sub location
-        const responseSub = await apiFetch({
+        const responseSub = await this.hwAPI.fetch({
           query: `
           mutation createLoc($locationDetails: LocationInput!){
             createLocation(locationDetails: $locationDetails){
@@ -182,7 +184,7 @@ export class LocationsService {
 
         if(selectedElement.parent){
           // Update parent location
-          const responseParent = await apiFetch({
+          const responseParent = await this.hwAPI.fetch({
             query: `
             mutation modLocation($parent_id: String!, $child_id: ID!){
               modifyLocation(id:$parent_id, locationDetails: {childrens: [$child_id]}){

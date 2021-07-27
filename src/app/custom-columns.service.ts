@@ -1,4 +1,4 @@
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -6,10 +6,12 @@ import { Injectable } from '@angular/core';
 })
 export class CustomColumnsService {
   customColumns: any[] = [];
-
+  constructor(
+    private hwAPI: hwAPI
+  ) { }
 
   queryCustomColumns = async() => {
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `
       query listCustomColumns{
         customColumnsList{
@@ -93,7 +95,7 @@ export class CustomColumnsService {
 
   saveNewCustomColumnAPI = async(selectedElement: any, customColumnDetails: any) => {
     // Create product
-    const responseCustomColumn = await apiFetch({
+    const responseCustomColumn = await this.hwAPI.fetch({
       query: `
       mutation createCustomColumn($customColumnDetails: CustomColumnInput!){
         createCustomColumn(customColumnDetails: $customColumnDetails){

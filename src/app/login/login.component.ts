@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { apiFetch } from 'src/common/api/api';
+import { hwAPI } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 import { Router } from "@angular/router"
 import getFormAsDict from 'src/common/form';
@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private notifications: NotificationsSharedService,
+    private hwAPI: hwAPI,
   ) {
     this.SignUpForm = this.fb.group({
       email: new FormControl('', [Validators.email, Validators.required]),
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit {
 
   onSignUpSubmit = async () => {
     let formDict = getFormAsDict(this.SignUpForm)
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `mutation createAccount($email: String, $password: String){
         createAccount(accountDetails: {email: $email, password: $password}){
           created
@@ -40,14 +41,22 @@ export class LoginComponent implements OnInit {
       }`,
       variables: formDict
     })
-    if(response.data){
-      console.log(response.data.data)
+    if(response.data.data.createAccount.created){
+      this.notifications.sendOpenNotificationEvent({
+        message: `Registered successfully - now you can login`,
+         type: 'SUCCESS'
+      });
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Could not register, try again or ask administrator for further help`,
+         type: 'ERROR'
+      });
     }
   }
 
   onSignInSubmit = async () => {
     let formDict = getFormAsDict(this.SignInForm)
-    const response = await apiFetch({
+    const response = await this.hwAPI.fetch({
       query: `query login($email: String, $password: String){
         login(email: $email, password: $password){
           authenticated,
@@ -63,15 +72,10 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard'])
       } else {
         this.notifications.sendOpenNotificationEvent({
-          message: `Couldnt sign in - check if you typed correct credentials`,
+          message: `Could not login - check if you used correct credentials`,
            type: 'ERROR'
         });
       }
-    } else {
-      this.notifications.sendOpenNotificationEvent({
-        message: `Couldnt obtain data from remote server`,
-         type: 'ERROR'
-      });
     }
     }
 
