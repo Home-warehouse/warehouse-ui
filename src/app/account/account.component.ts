@@ -87,7 +87,7 @@ export class AccountComponent implements OnInit {
         });
     } else {
       this.notifications.sendOpenNotificationEvent({
-        message: `Couldnt update password`,
+        message: `Couldnt update password - try again or ask administrator for further help`,
          type: 'ERROR'
       });
     }

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 import { hwAPI } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 import { Router } from '@angular/router'
+import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 
 enum sortByType {
   Ascending = '1',
@@ -49,6 +50,7 @@ export class RaportFormComponent implements OnInit {
     private hwAPI: hwAPI,
     private router: Router,
     private fb: FormBuilder,
+    private notifications: NotificationsSharedService,
   ) {
     this.RaportForm = this.fb.group({
       raportName: new FormControl('', [Validators.required]),
@@ -132,7 +134,20 @@ export class RaportFormComponent implements OnInit {
       }`,
       variables: {raportDetailsData: formDict}
     })
-    this.router.navigate(['/raport-display', result.data.data.createRaport.raport.id])
+    if(result.data){
+      if(result.data.data.createRaport.raport.id){
+        this.notifications.sendOpenNotificationEvent({
+          message: `Raport created! Now you will be redirected to new raport.`,
+          type: 'SUCCESS'
+        });
+        this.router.navigate(['/raport-display', result.data.data.createRaport.raport.id])
+      } else {
+        this.notifications.sendOpenNotificationEvent({
+          message: `Could not create raport - try again or ask administrator for further help`,
+          type: 'ERROR'
+        });
+      }
+    }
   }
 
   ngOnInit(): void {
