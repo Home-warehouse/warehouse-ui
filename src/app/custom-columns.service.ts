@@ -21,6 +21,7 @@ export class CustomColumnsService {
               name
               dataType
               elementsAllowed
+              values
             }
           }
         }

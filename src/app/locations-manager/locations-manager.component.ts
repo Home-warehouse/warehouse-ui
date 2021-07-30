@@ -29,7 +29,7 @@ export class LocationsManagerComponent implements OnInit {
   @Output() selectedElementChange = new EventEmitter();
 
   parentLocationName: string | undefined = "";
-  customColumnDataTypes = ['text', 'number', 'date']
+  customColumnDataTypes = ['text', 'number', 'date', 'select']
 
   constructor(
     public customColumnsService: CustomColumnsService,
@@ -328,6 +328,25 @@ export class LocationsManagerComponent implements OnInit {
     this.isCreatingNewElement = false
   }
 
+  // CREATE CC VALUE
+  addCustomColumnValue() {
+    if(!this.selectedElement.values){
+      this.selectedElement.values = [""]
+    } else {
+      this.selectedElement.values.push("")
+    }
+    this.selectedElementChange.emit(this.selectedElement)
+
+    console.log(this.selectedElement)
+}
+trackByFn(index: number, item: any) {
+  return index;
+}
+// REMOVE CC VALUE
+  removeCustomColumnValue(i: number){
+    this.selectedElement.values.splice(i, 1)
+    this.selectedElementChange.emit(this.selectedElement)
+  }
 
   ngOnInit(): void {
     this.locationsService.queryLocations(this.rootLocationId);
