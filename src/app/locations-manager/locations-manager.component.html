@@ -9,7 +9,7 @@
       Location</button>
   </div>
 
-  <!-- Details -->
+  <!-- Manager -->
   <div class="column is-12-mobile is-6-tablet is-4-widescreen is-4-fullhd is-offset-1-fullhd">
 
     <!-- Additional functions -->
@@ -39,7 +39,7 @@
         <tbody>
           <tr *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <td>{{customColumnParentNode.node.name}}</td>
-            <td><button class="button is-small mx-2">Edit</button></td>
+            <td><button (click)="onElementSelect({element: customColumnParentNode.node})" class="button is-small mx-2">Edit</button></td>
             <td>
               <ng-container *ngIf="customColumnParentNode.node.show; else hiddenCustomColumn">
                 <button class="button is-small mx-2" (click)="customColumnParentNode.node.show=false">Hide</button>
