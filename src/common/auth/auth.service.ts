@@ -1,6 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import jwtDecode from 'jwt-decode';
+import { hwAPI } from '../api/api';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +9,22 @@ import jwtDecode from 'jwt-decode';
 export class AuthService {
   accessToken: string | null = null;
 
-  constructor() { }
+  constructor(
+    private hwAPI: hwAPI,
+  ) { }
+
+  updateToken = async() => {
+    const response = await this.hwAPI.fetch({
+      query: `query updateToken {
+        refreshToken{
+         accessToken
+       }
+     }`
+    })
+    if(response.data?.data?.refreshToken?.accessToken){
+      localStorage.setItem("accessToken", response.data.data.refreshToken.accessToken)
+    }
+  }
 
   isLoggedIn(): boolean {
     this.accessToken = localStorage.getItem("accessToken")
@@ -16,7 +32,7 @@ export class AuthService {
       try {
         const token: any = jwtDecode(this.accessToken)
         if(new Date(token.exp * 1000) < new Date()){
-          console.log("Outdated")
+          // Token is outdated
           return false
         }
         return true
