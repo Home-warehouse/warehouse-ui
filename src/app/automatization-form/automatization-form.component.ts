@@ -1,4 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { hwAPI } from 'src/common/api/api';
+import getFormAsDict from 'src/common/form';
+import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 
 @Component({
   selector: 'app-automatization-form',
@@ -6,10 +10,112 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./automatization-form.component.scss']
 })
 export class AutomatizationFormComponent implements OnInit {
+  @Input() elementType!: string
+  @Input() elementID!: string
+  @Output() hideModal = new EventEmitter()
 
-  constructor() { }
+  AutomatizationForm: FormGroup;
+  apps = ["EVERNOTE"]
+  configs = {
+    evernote: [
+      {
+        name: "noteType",
+        readableName: "Note Type",
+        type: "select",
+        values: ["NOTE", "TODO"]
+      },
+      {
+        name: "noteTitle",
+        readableName: "Note Title",
+        type: "text"
+      }
+    ]
+  }
+  elementsMonitoredRaw = ["PRODUCT", "RAPORT"]
+
+  constructor(
+    private fb: FormBuilder,
+    private notifications: NotificationsSharedService,
+    private hwAPI: hwAPI
+  ) {
+    this.AutomatizationForm = this.fb.group({
+      app: this.fb.control(this.apps[0], [Validators.required]),
+      name: this.fb.control('', [Validators.required]),
+      elementsMonitored: this.fb.array(this.elementsMonitoredRaw.map(el => {
+        return this.fb.control(false, [Validators.required]);
+      }))
+    });
+  }
+
+  get config():FormGroup{
+    return <FormGroup>this.AutomatizationForm.get('config')
+  }
+
+  get elementsMonitored(): FormArray{
+    return <FormArray>this.AutomatizationForm.get('elementsMonitored')
+  }
+
+
+  onChangeApp = () => {
+    const app = this.AutomatizationForm.get('app')?.value
+    if(app==='EVERNOTE'){
+      this.AutomatizationForm.addControl('config', this.fb.group(
+        this.buildSettingsGroup(this.configs.evernote)
+      ))
+    }
+  }
+
+  buildSettingsGroup = (config: any) => {
+    let obj:any = {}
+    config.forEach((el: any) => {
+      obj[el.name] = this.fb.control('', [Validators.required]);
+    })
+    return obj
+  }
+
+  onAutomatizationSubmit = async() => {
+    let formDict = getFormAsDict(this.AutomatizationForm)
+
+    let elementsMonitored:string[] = []
+    formDict.elementsMonitored.forEach((el: Boolean, index: number) => {
+      if(el){
+        elementsMonitored.push(this.elementsMonitoredRaw[index])
+      }
+    })
+    formDict.elementsMonitored = elementsMonitored
+    formDict.config = JSON.stringify(formDict.config)
+
+    formDict.elementIntegrated = {
+      elementType: this.elementType,
+      elementID: this.elementID
+    }
+    const response = await this.hwAPI.fetch({
+      query: `mutation createAccount($automatizationDetails: AutomatizationInput!){
+        createAutomatization(automatizationDetails: $automatizationDetails){
+          automatization {
+            id
+          }
+        }
+      }`,
+      variables: {automatizationDetails: formDict}
+    })
+    console.log(response)
+    if(response.data?.data?.createAutomatization?.automatization?.id){
+      this.notifications.sendOpenNotificationEvent({
+        message: `Created automatization successfully`,
+         type: 'SUCCESS'
+      });
+      this.hideModal.emit()
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Could not create automatization - try again or ask administrator for further help`,
+         type: 'ERROR'
+      });
+    }
+  }
 
   ngOnInit(): void {
+    this.onChangeApp()
   }
 
 }

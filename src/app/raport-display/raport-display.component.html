@@ -7,19 +7,33 @@
       </app-raport>
     </div>
     <div class="column is-offset-1 is-narrow">
-      <h3 class="is-size-3 mt-1">Actions</h3>
-      <button class="button is-small is-danger mx-2" (click)="onRaportDeletion(raportsService.raportsList[0].id)">Delete
+      <h3 class="is-size-3 my-4">Actions</h3>
+      <button class="button is-primary mx-2" (click)="creatingAutomatization=true">Create
+        Automatization</button>
+      <button class="button is-danger mx-2" (click)="onRaportDeletion(raportsService.raportsList[0].id)">Delete
         raport</button>
       <hr/>
-      <h4 class="is-size-4 mt-2">Automatizations</h4>
-      <h5 class="is-size-5 mt-2">Evernote</h5>
-      <button class="button is-small is-primary mx-2" (click)="onEvernoteClick('NOTE')">Create notes</button>
-      <button class="button is-small is-primary mx-2" (click)="onEvernoteClick('TODO')">Create TODO note</button>
-      <hr/>
-      <h4 class="is-size-4 mt-2">Integrations</h4>
-      <h5 class="is-size-5 mt-2">Evernote</h5>
-      <button class="button is-small is-primary mx-2" (click)="onEvernoteClick('NOTE')">Create note</button>
-      <button class="button is-small is-primary mx-2" (click)="onEvernoteClick('TODO')">Create TODO note</button>
+      <h4 class="is-size-3 mt-2">Integrations</h4>
+      <h4 class="is-size-4 my-4">Evernote</h4>
+      <button class="button is-primary mx-2" (click)="onEvernoteClick('NOTE')">Generate note</button>
+      <button class="button is-primary mx-2" (click)="onEvernoteClick('TODO')">Generate to-do note</button>
     </div>
   </div>
 </ng-container>
+<
+<div [ngClass]="{'is-active': creatingAutomatization}" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-content">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Creating automatization</p>
+      <button (click)="creatingAutomatization=false" class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <app-automatization-form
+      (hideModal)="creatingAutomatization=false"
+      [elementID]="raportsService.raportsList[0].id"
+      [elementType]="'RAPORT'"
+      ></app-automatization-form>
+    </section>
+  </div>
+</div>
