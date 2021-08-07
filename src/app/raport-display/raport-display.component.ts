@@ -12,7 +12,7 @@ export class RaportDisplayComponent implements OnInit {
   raport!: any;
   id!: string | null;
   raportsList: any;
-  creatingAutomatization = true;
+  creatingAutomatization = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,

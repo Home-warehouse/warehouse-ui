@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AutomatizationsService } from '../automatizations.service';
 
 @Component({
   selector: 'app-automatizations-list',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AutomatizationsListComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    public AutomatizationsService: AutomatizationsService
+  ) { }
+
 
   ngOnInit(): void {
+    this.AutomatizationsService.queryAutomatizations()
   }
 
 }

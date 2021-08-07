@@ -21,10 +21,9 @@ export class IntegrationsService {
 
   queryEvernoteRaport = async(noteType: EvernoteType, noteTitle: string, raportVariables: any) => {
     const result = await this.hwAPI.fetch({
-      query: `query createEvernoteNote($noteTitle: String! $noteType: String!, $showCustomColumns: [String]!, $sortBy: SortRaportInput!, $filterBy: [FilterRaportInput]!, $limit: Int) {
+      query: `query createEvernoteNote($config: String!, $showCustomColumns: [String]!, $sortBy: SortRaportInput!, $filterBy: [FilterRaportInput]!, $limit: Int) {
         evernoteRaportResolver(
-          noteTitle: $noteTitle
-          noteType: $noteType
+          config: $config
           showCustomColumns: $showCustomColumns
           sortBy: $sortBy
           filterBy: $filterBy
@@ -33,9 +32,9 @@ export class IntegrationsService {
           createdNote
         }
       }`,
-      variables: {noteType, noteTitle,...raportVariables}
+      variables: {...raportVariables, config: JSON.stringify({noteType, noteTitle})}
     })
-    if(result.data.data.evernoteRaportResolver.createdNote){
+    if(result.data?.data?.evernoteRaportResolver?.createdNote){
       this.notifications.sendOpenNotificationEvent({
         message: `Created evernote note successfully!`,
          type: 'SUCCESS'
