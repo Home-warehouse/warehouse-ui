@@ -31,7 +31,7 @@ export class AutomatizationFormComponent implements OnInit {
       }
     ]
   }
-  elementsMonitoredRaw = ["PRODUCT", "RAPORT"]
+  elementsMonitoredRaw = ["PRODUCT", "LOCATION", "CUSTOM_COLUMN"]
 
   constructor(
     private fb: FormBuilder,

@@ -34,7 +34,7 @@
     </div>
   </div>
   <div class="field" formGroupName="elementsMonitored">
-    <label class="label">Call automatization with selected elements</label>
+    <label class="label">Bind elements to call automatization</label>
     <div *ngFor="let elMonitored of elementsMonitored.controls; let i=index">
       <label class="checkbox">
         <input type="checkbox" [formControlName]="i"/>
