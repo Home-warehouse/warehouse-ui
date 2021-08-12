@@ -55,6 +55,30 @@ export class RaportsService {
       return response
   }
 
+  parseRaports = (raportsListLocal: any) => {
+    const raportsListParsed = raportsListLocal.edges.map((parentNode:any)=>{
+      return {
+        showCustomColumns: parentNode.node.showCustomColumns.edges.map((parentShowCustomColumnNode:any)=>{
+          return parentShowCustomColumnNode.node.id
+        }),
+        sortBy: {
+          customColumn: parentNode.node.sortBy.customColumn.id,
+          value: parentNode.node.sortBy.value
+        },
+        filterBy: parentNode.node.filterBy.edges.map((parentFilterNode:any)=>{
+          return {
+            customColumn: parentFilterNode.node.customColumn.id,
+            comparison: parentFilterNode.node.comparison,
+            value: parentFilterNode.node.value
+          }
+        }),
+        limit: parentNode.node.shortResults
+      }
+    }
+  )
+  return raportsListParsed
+  }
+
   queryFilteredProductsList = async(raportsListLocal: any, noLimit?: boolean) => {
     this.raportsList=[]
     const parsedRaportInstructions = raportsListLocal.edges.map((parentNode:any)=>{
@@ -65,26 +89,8 @@ export class RaportsService {
           return {...parentShowCustomColumnNode.node}
       })
     }})
-    const raportsListParsed = raportsListLocal.edges.map((parentNode:any)=>{
-        return {
-          showCustomColumns: parentNode.node.showCustomColumns.edges.map((parentShowCustomColumnNode:any)=>{
-            return parentShowCustomColumnNode.node.id
-          }),
-          sortBy: {
-            customColumn: parentNode.node.sortBy.customColumn.id,
-            value: parentNode.node.sortBy.value
-          },
-          filterBy: parentNode.node.filterBy.edges.map((parentFilterNode:any)=>{
-            return {
-              customColumn: parentFilterNode.node.customColumn.id,
-              comparison: parentFilterNode.node.comparison,
-              value: parentFilterNode.node.value
-            }
-          }),
-          limit: parentNode.node.shortResults
-        }
-      }
-    )
+
+    let raportsListParsed = this.parseRaports(raportsListLocal)
 
     raportsListParsed.forEach(async(raport: any, index:number) => {
       let requestVariables: any = {
