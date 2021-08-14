@@ -32,12 +32,14 @@
       <table class="table">
         <thead>
           <tr>
+            <th></th>
             <th>Name</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr *ngFor="let customColumnParentNode of customColumnsService.customColumns">
+        <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+          <tr cdkDrag *ngFor="let customColumnParentNode of customColumnsService.customColumns">
+            <td style="cursor:grab">⠿</td>
             <td>{{customColumnParentNode.node.name}}</td>
             <td><button (click)="onElementSelect({element: customColumnParentNode.node})" class="button is-small mx-2">Edit</button></td>
             <td>

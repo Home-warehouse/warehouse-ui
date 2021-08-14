@@ -1,3 +1,4 @@
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { hwAPI } from 'src/common/api/api';
 import { CustomColumnsService } from '../custom-columns.service';
@@ -157,18 +158,17 @@ export class LocationsManagerComponent implements OnInit {
       else if(this.selectedElement.name){
         // If element is cutomColumn
         this.startSync(this.selectedElement.name)
-        const { id, show, ...customColumnDetails } = this.selectedElement
+        const { show, ...customColumnDetails } = this.selectedElement
         const responseUpdate = await this.hwAPI.fetch({
           query: `
-            mutation modCustomColumn($id: String!, $customColumnDetails: CustomColumnInput!){
-              modifyCustomColumn(id:$id, customColumnDetails: $customColumnDetails){
+            mutation modCustomColumn($input: [CustomColumnInput]!){
+              modifyCustomColumn(input: $input){
                 modified
               }
             }
             `,
             variables: {
-              id: this.selectedElement.id,
-              customColumnDetails: customColumnDetails
+              input: [customColumnDetails]
             }
         })
         if(responseUpdate.status === 200){
@@ -274,6 +274,7 @@ export class LocationsManagerComponent implements OnInit {
       }
     } else if(config.elementType==='customColumn'){
       this.selectedElement = {
+        index: this.customColumnsService.customColumns.length,
         name: "",
         elementsAllowed: [],
         dataType: "",
@@ -287,6 +288,7 @@ export class LocationsManagerComponent implements OnInit {
 
   // SAVE ELEMENTS
   onNewElementSave = async() => {
+    // Custom Columns
     if(this.selectedElement.name){
       const {show, ...customColumn } = this.selectedElement
       const {id, selectedElement} = await this.customColumnsService.saveNewCustomColumnAPI(this.selectedElement, {...customColumn})
@@ -338,14 +340,22 @@ export class LocationsManagerComponent implements OnInit {
     this.selectedElementChange.emit(this.selectedElement)
 
     console.log(this.selectedElement)
-}
-trackByFn(index: number, item: any) {
-  return index;
-}
-// REMOVE CC VALUE
+  }
+
+  trackByFn(index: number, item: any) {
+    return index;
+  }
+
+  // REMOVE CC VALUE
   removeCustomColumnValue(i: number){
     this.selectedElement.values.splice(i, 1)
     this.selectedElementChange.emit(this.selectedElement)
+  }
+
+  // Drag N Drop CC
+  drop(event: CdkDragDrop<any[]>) {
+    moveItemInArray(this.customColumnsService.customColumns, event.previousIndex, event.currentIndex);
+    this.customColumnsService.updateCustomColumnsIndexes()
   }
 
   ngOnInit(): void {
