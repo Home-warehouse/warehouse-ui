@@ -1,5 +1,6 @@
 import { hwAPI } from 'src/common/api/api';
 import { Injectable } from '@angular/core';
+import { DataObject } from 'src/common/interfaces/request.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class CustomColumnsService {
           edges{
             node{
               id
+              index
               name
               dataType
               elementsAllowed
@@ -29,7 +31,7 @@ export class CustomColumnsService {
     })
     this.customColumns = response.data.data.customColumnsList.edges.map((parentNode: any)=>{
       return {node: {...parentNode.node, show: true}}
-    })
+    }).sort((a:any, b:any) => a.node.index - b.node.index)
   }
 
 
@@ -61,6 +63,28 @@ export class CustomColumnsService {
     return ""
   }
 
+  updateCustomColumnsIndexes = async() => {
+    this.customColumns = this.customColumns.map((parentNode: any, index: number)=>{
+      return {node: {...parentNode.node, index}}
+    })
+
+    const cc_to_fetch = this.customColumns.map((parentNode: any)=>{
+      return parentNode.node
+    })
+
+    const responseUpdate = await this.hwAPI.fetch({
+      query: `
+        mutation modCustomColumn($input: [CustomColumnInput]!){
+          modifyCustomColumn(input: $input){
+            modified
+          }
+        }
+        `,
+        variables: {
+          input: cc_to_fetch.map(({show, ...others})=> others)
+        }
+    })
+  }
 
 
   updateCustomColumnModel = async(selectedElement: any, columnModelNode?: any, event?: any) => {
@@ -95,6 +119,7 @@ export class CustomColumnsService {
 
 
   saveNewCustomColumnAPI = async(selectedElement: any, customColumnDetails: any) => {
+    console.log(customColumnDetails)
     // Create product
     const responseCustomColumn = await this.hwAPI.fetch({
       query: `
