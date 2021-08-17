@@ -40,7 +40,7 @@ export class AutomatizationFormComponent implements OnInit {
   ) {
     this.AutomatizationForm = this.fb.group({
       app: this.fb.control(this.apps[0], [Validators.required]),
-      name: this.fb.control('', [Validators.required]),
+      automatizationName: this.fb.control('', [Validators.required]),
       elementsMonitored: this.fb.array(this.elementsMonitoredRaw.map(el => {
         return this.fb.control(false, [Validators.required]);
       }))

@@ -19,7 +19,7 @@ export class AutomatizationsService {
           edges{
             node{
               id
-              name
+              automatizationName
               app
               config
               elementIntegrated{

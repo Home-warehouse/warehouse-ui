@@ -20,7 +20,7 @@ export class CustomColumnsService {
             node{
               id
               index
-              name
+              customColumnName
               dataType
               elementsAllowed
               values
@@ -93,7 +93,7 @@ export class CustomColumnsService {
         {node:{
           customColumn: {
             id: columnModelNode.id,
-            name: columnModelNode.name
+            customColumnName: columnModelNode.customColumnName
           },
           value: event
         }}
@@ -108,7 +108,7 @@ export class CustomColumnsService {
       selectedElement.customColumns.edges.push({node:{
         customColumn: {
           id: columnModelNode.id,
-          name: columnModelNode.name
+          customColumnName: columnModelNode.customColumnName
         },
         value: event
       }})

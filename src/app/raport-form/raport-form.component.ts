@@ -42,7 +42,7 @@ export class RaportFormComponent implements OnInit {
   customColumnsList!: {
     node: {
       id: string
-      name: string;
+      customColumnName: string;
     }
   }[];
 
@@ -113,7 +113,7 @@ export class RaportFormComponent implements OnInit {
         edges{
           node{
             id
-            name
+            customColumnName
           }
         }
     }

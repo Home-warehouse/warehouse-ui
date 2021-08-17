@@ -91,7 +91,7 @@ export class LocationsManagerComponent implements OnInit {
   onElementUpdate = async() => {
     if(this.selectedElement.id){
       let customColumnsArr
-      if(!this.selectedElement.name){
+      if(!this.selectedElement.customColumnName){
         customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
           return {
             customColumn: parentNode.node.customColumn.id,
@@ -155,9 +155,8 @@ export class LocationsManagerComponent implements OnInit {
         }
 
       }
-      else if(this.selectedElement.name){
-        // If element is cutomColumn
-        this.startSync(this.selectedElement.name)
+      else if(this.selectedElement.customColumnName){
+        this.startSync(this.selectedElement.customColumnName)
         const { show, ...customColumnDetails } = this.selectedElement
         const responseUpdate = await this.hwAPI.fetch({
           query: `
@@ -176,7 +175,7 @@ export class LocationsManagerComponent implements OnInit {
             this.onSyncSuccess()
           }
         } else {
-          this.onSyncError(this.selectedElement.name)
+          this.onSyncError(this.selectedElement.customColumnName)
         }
       }
     }
@@ -217,7 +216,7 @@ export class LocationsManagerComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
-    } else if(this.selectedElement.name) {
+    } else if(this.selectedElement.customColumnName) {
       this.customColumnsService.customColumns = this.customColumnsService.customColumns.filter((column: any)=>{
         return column.node.id !== this.selectedElement.id
       })
@@ -275,7 +274,7 @@ export class LocationsManagerComponent implements OnInit {
     } else if(config.elementType==='customColumn'){
       this.selectedElement = {
         index: this.customColumnsService.customColumns.length,
-        name: "",
+        customColumnName: "",
         elementsAllowed: [],
         dataType: "",
       }
@@ -289,7 +288,7 @@ export class LocationsManagerComponent implements OnInit {
   // SAVE ELEMENTS
   onNewElementSave = async() => {
     // Custom Columns
-    if(this.selectedElement.name){
+    if(this.selectedElement.customColumnName){
       const {show, ...customColumn } = this.selectedElement
       const {id, selectedElement} = await this.customColumnsService.saveNewCustomColumnAPI(this.selectedElement, {...customColumn})
       this.selectedElement = selectedElement

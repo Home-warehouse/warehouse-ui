@@ -43,7 +43,7 @@ export class RaportsService {
                 edges{
                   node{
                     id
-                    name
+                    customColumns
                   }
                 }
               }
@@ -118,7 +118,7 @@ export class RaportsService {
                   value
                    customColumn{
                     id
-                    name
+                    customColumnName
                   }
                 }
               }

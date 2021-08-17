@@ -168,7 +168,7 @@ export class LocationsService {
         // Create sub location
         const responseSub = await this.hwAPI.fetch({
           query: `
-          mutation createLoc($locationDetails: LocationInput!){
+          mutation createLoc($locationDetails: CreatingLocationInput!){
             createLocation(locationDetails: $locationDetails){
               location{
                 id
