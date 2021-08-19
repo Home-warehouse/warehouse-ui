@@ -40,7 +40,7 @@
         <tbody cdkDropList (cdkDropListDropped)="drop($event)">
           <tr cdkDrag *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <td style="cursor:grab">⠿</td>
-            <td>{{customColumnParentNode.node.name}}</td>
+            <td>{{customColumnParentNode.node.customColumnName}}</td>
             <td><button (click)="onElementSelect({element: customColumnParentNode.node})" class="button is-small mx-2">Edit</button></td>
             <td>
               <ng-container *ngIf="customColumnParentNode.node.show; else hiddenCustomColumn">
@@ -69,7 +69,7 @@
         <ng-container *ngIf="selectedElement.hasOwnProperty('productName')">
           Product under {{parentLocationName}}
         </ng-container>
-        <ng-container *ngIf="selectedElement.hasOwnProperty('name')">Column </ng-container>
+        <ng-container *ngIf="selectedElement.hasOwnProperty('customColumnName')">Column </ng-container>
       </p>
       <div class="field">
         <label class="label">Name</label>
@@ -78,28 +78,28 @@
             [(ngModel)]="selectedElement.locationName" (ngModelChange)="onElementUpdate()" />
           <input *ngIf="selectedElement.hasOwnProperty('productName')" class="input" type="text"
             [(ngModel)]="selectedElement.productName" (ngModelChange)="onElementUpdate()" />
-          <input *ngIf="selectedElement.hasOwnProperty('name')" class="input" type="text"
-            [(ngModel)]="selectedElement.name" (ngModelChange)="onElementUpdate()" />
+          <input *ngIf="selectedElement.hasOwnProperty('customColumnName')" class="input" type="text"
+            [(ngModel)]="selectedElement.customColumnName" (ngModelChange)="onElementUpdate()" />
         </div>
       </div>
 
       <!-- Only customColumns Managing -->
-      <ng-container *ngIf="selectedElement.hasOwnProperty('name')">
+      <ng-container *ngIf="selectedElement.hasOwnProperty('customColumnName')">
         <!-- Data type -->
         <div class="field">
           <label class="label">Data Type</label>
           <div class="control" class="select">
-            <select name="duration" [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
+            <select name="duration" required [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
               <option *ngFor="let customColumnDataType of customColumnDataTypes" [value]="customColumnDataType"
                 selected="selectedElement.dataType === customColumnDataType">
-                {{customColumnDataType}}
+                {{customColumnDataType | titlecase}}
               </option>
             </select>
           </div>
         </div>
         <div *ngIf="selectedElement.dataType=='select'" class="field">
           <label class="label">Values</label>
-          <div *ngFor="let value of selectedElement.values; let i = index;  trackBy: trackByFn">
+          <div *ngFor="let value of selectedElement.values; let i = index;  trackBy: trackForCCvalues">
             <div class="control is-flex is-align-items-baseline">
               <i (click)="removeCustomColumnValue(i)" class="ph-x"></i>
               <input class="input" type="text" [(ngModel)]="selectedElement.values[i]" (ngModelChange)="onElementUpdate()" />
@@ -111,20 +111,18 @@
         <div class="field">
           <label class="label">Allowed elements</label>
           <div class="control">
+          <ng-container *ngFor="let element of ['LOCATIONS', 'PRODUCTS']">
             <label class="checkbox mx-2">
-              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('locations')"
-                (ngModelChange)="onCustomColumnUpdate('locations')"> Locations
+              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes(element)"
+                (ngModelChange)="onCustomColumnUpdate(element)"> {{element | titlecase}}
             </label>
-            <label class="checkbox mx-2">
-              <input type="checkbox" [ngModel]="selectedElement.elementsAllowed.includes('products')"
-                (ngModelChange)="onCustomColumnUpdate('products')"> Products
-            </label>
+          </ng-container>
           </div>
         </div>
       </ng-container>
 
       <!-- Products and Locations -->
-      <ng-container *ngIf="!selectedElement.hasOwnProperty('name')">
+      <ng-container *ngIf="!selectedElement.hasOwnProperty('customColumnName')">
         <!-- Description -->
         <div class="field">
           <label class="label">Description</label>
@@ -140,12 +138,12 @@
           <h3 class="is-size-4">Custom Columns</h3>
           <div class="field" *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <ng-container *ngIf="
-              selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('products') ||
-              selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('locations')
+              selectedElement.hasOwnProperty('productName') && customColumnParentNode.node.elementsAllowed.includes('PRODUCTS') ||
+              selectedElement.hasOwnProperty('locationName') && customColumnParentNode.node.elementsAllowed.includes('LOCATIONS')
             ">
-              <label class="label">{{customColumnParentNode.node.name}}</label>
+              <label class="label">{{customColumnParentNode.node.customColumnName}}</label>
               <div class="control">
-                <ng-container *ngIf="customColumnParentNode.node.dataType!=='select'; else selectTemplate">
+                <ng-container *ngIf="customColumnParentNode.node.dataType !== 'SELECT'; else selectTemplate">
                   <input class="input" type="{{customColumnParentNode.node.dataType}}"
                     [ngModel]="customColumnsService.findCustomColumnModel(selectedElement, customColumnParentNode.node.id)"
                     (ngModelChange)="customColumnsService.updateCustomColumnModel(selectedElement, customColumnParentNode.node, $event)"
@@ -156,7 +154,7 @@
                     <select
                       [ngModel]="customColumnsService.findCustomColumnModel(selectedElement, customColumnParentNode.node.id)"
                       (ngModelChange)="customColumnsService.updateCustomColumnModel(selectedElement, customColumnParentNode.node, $event)"
-                    (ngModelChange)="onElementUpdate()"
+                      (ngModelChange)="onElementUpdate()"
                     >
                       <option *ngFor="let value of customColumnParentNode.node.values" [value]="value">{{value}}</option>
                     </select>

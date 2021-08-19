@@ -46,7 +46,7 @@
     <label class="label">Show custom columns in raport*</label>
     <select formControlName="showCustomColumns" multiple>
       <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
-        {{edges.node.name}}
+        {{edges.node.customColumnName}}
       </option>
     </select>
   </div>
@@ -58,7 +58,7 @@
     <div class="select">
       <select formControlName="customColumn">
         <option *ngFor="let edges of customColumnsList; let i = index" [value]="customColumnsList[i].node.id">
-          {{edges.node.name}}
+          {{edges.node.customColumnName}}
         </option>
       </select>
     </div>
@@ -84,7 +84,7 @@
         <div class="select">
           <select formControlName="customColumn">
             <option *ngFor="let edges of customColumnsList; let k = index" [value]="customColumnsList[k].node.id">
-              {{edges.node.name}}
+              {{edges.node.customColumnName}}
             </option>
           </select>
         </div>

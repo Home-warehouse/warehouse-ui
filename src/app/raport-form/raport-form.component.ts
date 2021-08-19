@@ -42,7 +42,7 @@ export class RaportFormComponent implements OnInit {
   customColumnsList!: {
     node: {
       id: string
-      name: string;
+      customColumnName: string;
     }
   }[];
 
@@ -113,7 +113,7 @@ export class RaportFormComponent implements OnInit {
         edges{
           node{
             id
-            name
+            customColumnName
           }
         }
     }
@@ -125,7 +125,7 @@ export class RaportFormComponent implements OnInit {
   onRaportSubmit = async() => {
     const formDict = getFormAsDict(this.RaportForm)
     const result = await this.hwAPI.fetch({
-      query: `mutation create_raport($raportDetailsData: RaportInput!)  {
+      query: `mutation create_raport($raportDetailsData: CreatingRaportInput!)  {
         createRaport(raportDetails:$raportDetailsData){
           raport{
             id

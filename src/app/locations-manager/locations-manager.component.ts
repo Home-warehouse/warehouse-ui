@@ -1,13 +1,14 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { hwAPI } from 'src/common/api/api';
-import { CustomColumnsService } from '../custom-columns.service';
-import { LocationsService } from '../locations.service';
+import { customColumnParentNode, CustomColumnsService, customColumnValueParentNode, dataTypesEnum } from '../custom-columns.service';
+import { locationParentNode, LocationsService } from '../locations.service';
 
 interface sync {
   status: 'synced' | 'pending' | 'error',
   text: string
 }
+
 
 @Component({
   selector: 'app-locations-manager',
@@ -29,8 +30,8 @@ export class LocationsManagerComponent implements OnInit {
   @Input() selectedElement: any = null;
   @Output() selectedElementChange = new EventEmitter();
 
-  parentLocationName: string | undefined = "";
-  customColumnDataTypes = ['text', 'number', 'date', 'select']
+  parentLocationName: string | undefined;
+  customColumnDataTypes = Object.keys(dataTypesEnum)
 
   constructor(
     public customColumnsService: CustomColumnsService,
@@ -89,25 +90,49 @@ export class LocationsManagerComponent implements OnInit {
 
   // UPDATE ELEMENT
   onElementUpdate = async() => {
+    // Check if selectedElement is already created in DB (then only it has ID property)
     if(this.selectedElement.id){
-      let customColumnsArr
-      if(!this.selectedElement.name){
-        customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
-          return {
-            customColumn: parentNode.node.customColumn.id,
-            value: parentNode.node.value
-          }
+      if(this.selectedElement.customColumnName) {
+        this.startSync(this.selectedElement.customColumnName)
+        const { show, ...customColumnDetails } = this.selectedElement
+        const responseUpdate = await this.hwAPI.fetch({
+          query: `
+            mutation modCustomColumn($input: [CustomColumnInput]!){
+              modifyCustomColumn(input: $input){
+                modified
+              }
+            }
+            `,
+            variables: {
+              input: [customColumnDetails]
+            }
         })
+        if(responseUpdate.status === 200){
+          if(responseUpdate.data.data.modifyCustomColumn.modified){
+            this.onSyncSuccess()
+          }
+        } else {
+          this.onSyncError(this.selectedElement.customColumnName)
+        }
+        return
       }
+
+      let customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode: customColumnValueParentNode)=>{
+        return {
+          customColumn: parentNode.node.customColumn.id,
+          value: parentNode.node.value
+        }
+      })
+
       if(this.selectedElement.productName){
       this.startSync(this.selectedElement.productName)
 
-      const { id, customColumns, ...productDet } = this.selectedElement
+      const { customColumns, ...productDet } = this.selectedElement
       // If element is product
       const responseUpdate = await this.hwAPI.fetch({
         query: `
-        mutation modProduct($id: String!, $productDetails: ProductInput!){
-          modifyProduct(id:$id, productDetails: $productDetails){
+        mutation modProduct($productDetails: ProductInput!){
+          modifyProduct(productDetails: $productDetails){
             modified
           }
         }
@@ -127,6 +152,7 @@ export class LocationsManagerComponent implements OnInit {
       }
 
       }
+
       else if(this.selectedElement.locationName){
 
         // If element is location
@@ -155,30 +181,7 @@ export class LocationsManagerComponent implements OnInit {
         }
 
       }
-      else if(this.selectedElement.name){
-        // If element is cutomColumn
-        this.startSync(this.selectedElement.name)
-        const { show, ...customColumnDetails } = this.selectedElement
-        const responseUpdate = await this.hwAPI.fetch({
-          query: `
-            mutation modCustomColumn($input: [CustomColumnInput]!){
-              modifyCustomColumn(input: $input){
-                modified
-              }
-            }
-            `,
-            variables: {
-              input: [customColumnDetails]
-            }
-        })
-        if(responseUpdate.status === 200){
-          if(responseUpdate.data.data.modifyCustomColumn.modified){
-            this.onSyncSuccess()
-          }
-        } else {
-          this.onSyncError(this.selectedElement.name)
-        }
-      }
+
     }
   }
 
@@ -186,8 +189,8 @@ export class LocationsManagerComponent implements OnInit {
   onElementDelete = async() => {
     this.showDetails = false
     if(this.selectedElement.productName){
-      this.locationsService.elements.forEach((el: any)=>{
-        this.locationsService.deleteRecNested(el, this.selectedElement, 'products')
+      this.locationsService.elements.forEach((el: locationParentNode)=>{
+        this.locationsService.deleteRecNested(el, 'products', this.selectedElement)
       })
       const responseDelProd = await this.hwAPI.fetch({
         query: `
@@ -202,8 +205,8 @@ export class LocationsManagerComponent implements OnInit {
         }
       })
     } else if(this.selectedElement.locationName){
-      this.locationsService.elements.forEach((el: any)=>{
-        this.locationsService.deleteRecNested(el, this.selectedElement, 'childrens')
+      this.locationsService.elements.forEach((el: locationParentNode)=>{
+        this.locationsService.deleteRecNested(el, 'childrens', this.selectedElement)
       })
       const responseDelLoc = await this.hwAPI.fetch({
         query: `
@@ -217,8 +220,8 @@ export class LocationsManagerComponent implements OnInit {
           id: this.selectedElement.id
         }
       })
-    } else if(this.selectedElement.name) {
-      this.customColumnsService.customColumns = this.customColumnsService.customColumns.filter((column: any)=>{
+    } else if(this.selectedElement.customColumnName) {
+      this.customColumnsService.customColumns = this.customColumnsService.customColumns.filter((column: customColumnParentNode)=>{
         return column.node.id !== this.selectedElement.id
       })
       const responseDelCustomColumn = await this.hwAPI.fetch({
@@ -275,7 +278,7 @@ export class LocationsManagerComponent implements OnInit {
     } else if(config.elementType==='customColumn'){
       this.selectedElement = {
         index: this.customColumnsService.customColumns.length,
-        name: "",
+        customColumnName: "",
         elementsAllowed: [],
         dataType: "",
       }
@@ -288,8 +291,7 @@ export class LocationsManagerComponent implements OnInit {
 
   // SAVE ELEMENTS
   onNewElementSave = async() => {
-    // Custom Columns
-    if(this.selectedElement.name){
+    if(this.selectedElement.customColumnName){
       const {show, ...customColumn } = this.selectedElement
       const {id, selectedElement} = await this.customColumnsService.saveNewCustomColumnAPI(this.selectedElement, {...customColumn})
       this.selectedElement = selectedElement
@@ -298,7 +300,8 @@ export class LocationsManagerComponent implements OnInit {
       return
     }
 
-    const customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode:any)=>{
+    // Prepare element custom column
+    const customColumnsArr = this.selectedElement.customColumns.edges.map((parentNode: customColumnValueParentNode)=>{
       return {
         customColumn: parentNode.node.customColumn.id,
         value: parentNode.node.value
@@ -313,7 +316,8 @@ export class LocationsManagerComponent implements OnInit {
       const { parent, customColumns, ...productDet } = this.selectedElement
       await this.locationsService.saveNewProductAPI(this.selectedElement, {...productDet, customColumns: customColumnsArr})
 
-    } else if(this.selectedElement.locationName) {
+    }
+    else if(this.selectedElement.locationName) {
 
         if(this.selectedElement.parent){
           // foreach root
@@ -324,9 +328,9 @@ export class LocationsManagerComponent implements OnInit {
           this.locationsService.elements.push({node: this.selectedElement})
         }
 
-        const { parent, childrens, products, customColumns, ...locationDet } = this.selectedElement
-        await this.locationsService.saveNewSubLocationAPI(this.selectedElement, {...locationDet, customColumns: customColumnsArr})
-      }
+        const {parent, childrens, products, customColumns, ...locationDet } = this.selectedElement
+        await this.locationsService.saveNewLocationAPI(this.selectedElement, {...locationDet, customColumns: customColumnsArr})
+    }
     this.isCreatingNewElement = false
   }
 
@@ -342,7 +346,7 @@ export class LocationsManagerComponent implements OnInit {
     console.log(this.selectedElement)
   }
 
-  trackByFn(index: number, item: any) {
+  trackForCCvalues(index: number, item: any) {
     return index;
   }
 
@@ -353,9 +357,9 @@ export class LocationsManagerComponent implements OnInit {
   }
 
   // Drag N Drop CC
-  drop(event: CdkDragDrop<any[]>) {
+  drop(event: CdkDragDrop<customColumnParentNode[]>) {
     moveItemInArray(this.customColumnsService.customColumns, event.previousIndex, event.currentIndex);
-    this.customColumnsService.updateCustomColumnsIndexes()
+    this.customColumnsService.updateCustomColumnsIndexesAPI()
   }
 
   ngOnInit(): void {

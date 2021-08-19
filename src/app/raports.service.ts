@@ -1,11 +1,56 @@
 import { Injectable } from '@angular/core';
 import { hwAPI } from 'src/common/api/api';
+import { customColumn, customColumnParentNode } from './custom-columns.service';
+
+
+interface filterBy {
+  node: {
+    customColumn: customColumn
+    comparison: string
+    value: string
+  }
+}
+
+interface sortBy {
+  node: {
+    id: string
+    customColumn: customColumn
+    comparison: string
+    value: string
+  }
+}
+
+interface raport {
+  id: string
+  raportName: string
+  description: string
+  showCustomColumns: {
+    edges: customColumnParentNode[]
+  }
+  sortBy: sortBy
+  filterBy: {
+    edges: filterBy[]
+  }
+  shortResults: number
+  productsList?: any
+  customColumns?: any
+}
+
+export interface raportParentNode {
+  node: raport
+}
+
+interface raportsList {
+  edges: raportParentNode[]
+}
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class RaportsService {
-  raportsList: any = [];
+  raportsList: raport[] = [];
 
   constructor(
     private hwAPI: hwAPI
@@ -43,7 +88,7 @@ export class RaportsService {
                 edges{
                   node{
                     id
-                    name
+                    customColumnName
                   }
                 }
               }
@@ -55,7 +100,7 @@ export class RaportsService {
       return response
   }
 
-  parseRaports = (raportsListLocal: any) => {
+  parseRaports = (raportsListLocal: raportsList) => {
     const raportsListParsed = raportsListLocal.edges.map((parentNode:any)=>{
       return {
         showCustomColumns: parentNode.node.showCustomColumns.edges.map((parentShowCustomColumnNode:any)=>{
@@ -79,8 +124,8 @@ export class RaportsService {
   return raportsListParsed
   }
 
-  queryFilteredProductsList = async(raportsListLocal: any, noLimit?: boolean) => {
-    this.raportsList=[]
+  queryFilteredProductsList = async(raportsListLocal: raportsList, noLimit?: boolean) => {
+    this.raportsList = []
     const parsedRaportInstructions = raportsListLocal.edges.map((parentNode:any)=>{
       return {
         id: parentNode.node.id,
@@ -92,7 +137,7 @@ export class RaportsService {
 
     let raportsListParsed = this.parseRaports(raportsListLocal)
 
-    raportsListParsed.forEach(async(raport: any, index:number) => {
+    await raportsListParsed.forEach(async(raport: any, index:number) => {
       let requestVariables: any = {
         showCustomColumns: raportsListParsed[index].showCustomColumns,
         sortBy: raportsListParsed[index].sortBy,
@@ -118,7 +163,7 @@ export class RaportsService {
                   value
                    customColumn{
                     id
-                    name
+                    customColumnName
                   }
                 }
               }
@@ -131,7 +176,7 @@ export class RaportsService {
       raport = {
           id: parsedRaportInstructions[index].id,
           raportName: parsedRaportInstructions[index].name,
-          customColumns: parsedRaportInstructions[index].showCustomColumns,
+          showCustomColumns: parsedRaportInstructions[index].showCustomColumns,
           productsList: result.data.data.filterSortProducts
       }
 

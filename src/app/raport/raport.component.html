@@ -2,9 +2,9 @@
   <thead>
     <tr>
       <th>Name</th>
-      <ng-container *ngFor="let customColumnParentNode of customColumns">
+      <ng-container *ngFor="let customColumnParentNode of showCustomColumns">
         <th>
-          {{customColumnParentNode.name}}
+          {{customColumnParentNode.customColumnName}}
         </th>
       </ng-container>
     </tr>
@@ -14,10 +14,9 @@
       <td>
         <p>{{product.productName}}</p>
       </td>
-      <ng-container *ngFor="let customColumnParentNode of customColumns">
+      <ng-container *ngFor="let customColumnParentNode of showCustomColumns">
         <td>
-          {{customColumnsService.findCustomColumnValue(customColumnParentNode.id,
-          product.customColumns.edges)}}
+          {{customColumnsService.findCustomColumnValue(customColumnParentNode.id, product.customColumns.edges)}}
         </td>
       </ng-container>
       <td></td>

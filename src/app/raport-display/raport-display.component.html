@@ -1,8 +1,8 @@
-<ng-container *ngIf="raportsService.raportsList.length>0">
+<ng-container *ngIf="raportsService.raportsList[0]">
   <h2 class="is-size-2">Raport - {{raportsService.raportsList[0].raportName}}</h2>
   <div class="columns">
     <div class="column is-narrow">
-      <app-raport [customColumns]="raportsService.raportsList[0].customColumns"
+      <app-raport [showCustomColumns]="raportsService.raportsList[0].showCustomColumns"
         [productsList]="raportsService.raportsList[0].productsList">
       </app-raport>
     </div>
@@ -19,20 +19,21 @@
       <button class="button is-primary mx-2" (click)="onEvernoteClick('TODO')">Generate to-do note</button>
     </div>
   </div>
-</ng-container>
-<div [ngClass]="{'is-active': creatingAutomatization}" class="modal">
-  <div class="modal-background"></div>
-  <div class="modal-content">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Creating automatization</p>
-      <button (click)="creatingAutomatization=false" class="delete" aria-label="close"></button>
-    </header>
-    <section class="modal-card-body">
-      <app-automatization-form
-      (hideModal)="creatingAutomatization=false"
-      [elementID]="raportsService.raportsList[0].id"
-      [elementType]="'RAPORT'"
-      ></app-automatization-form>
-    </section>
+
+  <div [ngClass]="{'is-active': creatingAutomatization}" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Creating automatization</p>
+        <button (click)="creatingAutomatization=false" class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <app-automatization-form
+        (hideModal)="creatingAutomatization=false"
+        [elementID]="raportsService.raportsList[0].id"
+        [elementType]="'RAPORT'"
+        ></app-automatization-form>
+      </section>
+    </div>
   </div>
-</div>
+</ng-container>

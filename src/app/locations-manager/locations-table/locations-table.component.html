@@ -12,7 +12,7 @@
           (click)="onElementSelectEvent(customColumnParentNode.node)">
           <th [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
             (click)="onElementSelectEvent(customColumnParentNode.node)" *ngIf="customColumnParentNode.node.show">
-            {{customColumnParentNode.node.name}}
+            {{customColumnParentNode.node.customColumnName}}
           </th>
         </ng-container>
         <th>Actions</th>
@@ -92,13 +92,6 @@
 
       <!-- Products -->
       <ng-container *ngIf="parentNode.node.hasOwnProperty('products')">
-        <!-- <app-product-template
-              [productsList]="parentNode.node.products.edges"
-              [index]="i+10"
-              (onElementSelect)="onElementSelectEventNested($event)"
-              [customColumnsService]="customColumnsService"
-              [parentLocationNameLocal]="parentNode.node.locationName">
-        </app-product-template> -->
         <ng-container
           *ngTemplateOutlet="productsListTmpl; context:{ productsList: parentNode.node.products.edges, index: i+10, parentLocationNameLocal: parentNode.node.locationName }">
         </ng-container>

@@ -34,12 +34,12 @@ export class LoginComponent implements OnInit {
   onSignUpSubmit = async () => {
     let formDict = getFormAsDict(this.SignUpForm)
     const response = await this.hwAPI.fetch({
-      query: `mutation createAccount($email: String, $password: String){
-        createAccount(accountDetails: {email: $email, password: $password}){
+      query: `mutation createAccount($accountDetails: CreatingAccountInput!){
+        createAccount(accountDetails: $accountDetails){
           created
         }
       }`,
-      variables: formDict
+      variables: {accountDetails: formDict}
     })
     if(response.data.data.createAccount.created){
       this.notifications.sendOpenNotificationEvent({

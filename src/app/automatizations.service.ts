@@ -1,11 +1,28 @@
 import { Injectable } from '@angular/core';
 import { hwAPI } from 'src/common/api/api';
 
+
+
+interface automatization {
+  id: string
+  automatizationName: string
+  app: string
+  config: string
+  elementIntegrated: {
+    __typename: string
+  }
+}
+
+export interface automatizationParentNode {
+  node: automatization
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
 export class AutomatizationsService {
-  automatizations: any[] = [];
+  automatizations: automatizationParentNode[] = [];
 
   constructor(
     private hwAPI: hwAPI
@@ -19,7 +36,7 @@ export class AutomatizationsService {
           edges{
             node{
               id
-              name
+              automatizationName
               app
               config
               elementIntegrated{
