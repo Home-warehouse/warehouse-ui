@@ -40,6 +40,10 @@ export interface raportParentNode {
   node: raport
 }
 
+interface raportsList {
+  edges: raportParentNode[]
+}
+
 
 
 @Injectable({
@@ -96,7 +100,7 @@ export class RaportsService {
       return response
   }
 
-  parseRaports = (raportsListLocal: any) => {
+  parseRaports = (raportsListLocal: raportsList) => {
     const raportsListParsed = raportsListLocal.edges.map((parentNode:any)=>{
       return {
         showCustomColumns: parentNode.node.showCustomColumns.edges.map((parentShowCustomColumnNode:any)=>{
@@ -120,8 +124,8 @@ export class RaportsService {
   return raportsListParsed
   }
 
-  queryFilteredProductsList = async(raportsListLocal: any, noLimit?: boolean) => {
-    this.raportsList=[]
+  queryFilteredProductsList = async(raportsListLocal: raportsList, noLimit?: boolean) => {
+    this.raportsList = []
     const parsedRaportInstructions = raportsListLocal.edges.map((parentNode:any)=>{
       return {
         id: parentNode.node.id,
@@ -133,7 +137,7 @@ export class RaportsService {
 
     let raportsListParsed = this.parseRaports(raportsListLocal)
 
-    raportsListParsed.forEach(async(raport: any, index:number) => {
+    await raportsListParsed.forEach(async(raport: any, index:number) => {
       let requestVariables: any = {
         showCustomColumns: raportsListParsed[index].showCustomColumns,
         sortBy: raportsListParsed[index].sortBy,
@@ -172,7 +176,7 @@ export class RaportsService {
       raport = {
           id: parsedRaportInstructions[index].id,
           raportName: parsedRaportInstructions[index].name,
-          customColumns: parsedRaportInstructions[index].showCustomColumns,
+          showCustomColumns: parsedRaportInstructions[index].showCustomColumns,
           productsList: result.data.data.filterSortProducts
       }
 

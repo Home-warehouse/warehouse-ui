@@ -7,7 +7,7 @@ import { CustomColumnsService } from '../custom-columns.service';
   styleUrls: ['./raport.component.scss']
 })
 export class RaportComponent implements OnInit {
-  @Input() public customColumns!: any;
+  @Input() public showCustomColumns!: any;
   @Input() public productsList!: any;
 
   constructor(

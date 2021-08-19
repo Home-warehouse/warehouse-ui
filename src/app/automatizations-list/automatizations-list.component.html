@@ -1,5 +1,6 @@
 <h2 class="is-size-2">Automatizations</h2>
 
+<ng-container *ngIf="AutomatizationsService.automatizations.length > 0; else noAutomatizationsTemplate">
 <div class="columns">
   <ng-container *ngFor="let parentNode of AutomatizationsService.automatizations">
     <div class="column is-2">
@@ -11,3 +12,7 @@
     </div>
   </ng-container>
 </div>
+</ng-container>
+<ng-template #noAutomatizationsTemplate>
+  <h3 class="is-size-4 mt-5">No automatizations yet, try to add one (in raport view).</h3>
+</ng-template>

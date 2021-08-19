@@ -90,7 +90,7 @@ export class AutomatizationFormComponent implements OnInit {
       elementID: this.elementID
     }
     const response = await this.hwAPI.fetch({
-      query: `mutation createAccount($automatizationDetails: AutomatizationInput!){
+      query: `mutation createAccount($automatizationDetails: CreatingAutomatizationInput!){
         createAutomatization(automatizationDetails: $automatizationDetails){
           automatization {
             id
@@ -99,7 +99,6 @@ export class AutomatizationFormComponent implements OnInit {
       }`,
       variables: {automatizationDetails: formDict}
     })
-    console.log(response)
     if(response.data?.data?.createAutomatization?.automatization?.id){
       this.notifications.sendOpenNotificationEvent({
         message: `Created automatization successfully`,

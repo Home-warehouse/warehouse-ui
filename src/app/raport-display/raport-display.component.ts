@@ -35,7 +35,7 @@ export class RaportDisplayComponent implements OnInit {
   initialQuery = async(id: string | null) => {
     const result = await this.raportsService.queryRaportsList(id)
     this.raportsList = result.data.data.raportsList
-    this.raportsService.queryFilteredProductsList(result.data.data.raportsList, true)
+    await this.raportsService.queryFilteredProductsList(result.data.data.raportsList, true)
   }
 
   ngOnInit(): void {

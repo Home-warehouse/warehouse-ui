@@ -74,6 +74,7 @@ export class AccountComponent implements OnInit {
       }
     })
     if(response.data.data.modifyAccount.modified){
+      this.oldAccountData.firstName = formDict.firstName
       this.notifications.sendOpenNotificationEvent({
         message: `Updated account information successfully`,
          type: 'SUCCESS'

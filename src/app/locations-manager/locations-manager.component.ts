@@ -127,12 +127,12 @@ export class LocationsManagerComponent implements OnInit {
       if(this.selectedElement.productName){
       this.startSync(this.selectedElement.productName)
 
-      const { id, customColumns, ...productDet } = this.selectedElement
+      const { customColumns, ...productDet } = this.selectedElement
       // If element is product
       const responseUpdate = await this.hwAPI.fetch({
         query: `
-        mutation modProduct($id: String!, $productDetails: ProductInput!){
-          modifyProduct(id:$id, productDetails: $productDetails){
+        mutation modProduct($productDetails: ProductInput!){
+          modifyProduct(productDetails: $productDetails){
             modified
           }
         }

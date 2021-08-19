@@ -1,17 +1,20 @@
 <h2 class="is-size-2">Raports</h2>
 <a routerLink="/create-raport" class="button is-primary is-inverted">Add new raport</a>
 
-<div class="columns">
+
+<ng-container *ngIf="raportsService.raportsList.length > 0; else noRaportsTemplate">
+  <div class="columns">
     <ng-container *ngFor="let raport of raportsService.raportsList">
       <div class="column is-3">
         <div class="box">
-        <h1 class="is-size-4">{{raport.raportName}}</h1>
-        <app-raport
-        [customColumns]="raport.customColumns"
-        [productsList]="raport.productsList"
-      ></app-raport>
-      <a [routerLink]="['/raport-display/', raport.id]" class="button is-primary is-inverted">Show raport</a>
-    </div>
-    </div>
-  </ng-container>
-</div>
+          <h1 class="is-size-4">{{raport.raportName}}</h1>
+          <app-raport [showCustomColumns]="raport.showCustomColumns" [productsList]="raport.productsList"></app-raport>
+          <a [routerLink]="['/raport-display/', raport.id]" class="button is-primary is-inverted">Show raport</a>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+<ng-template #noRaportsTemplate>
+  <h3 class="is-size-3 mt-5">No raports yet, try to add one.</h3>
+</ng-template>

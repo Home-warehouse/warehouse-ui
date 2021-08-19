@@ -89,7 +89,7 @@
         <div class="field">
           <label class="label">Data Type</label>
           <div class="control" class="select">
-            <select name="duration" [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
+            <select name="duration" required [(ngModel)]="selectedElement.dataType" (ngModelChange)="onElementUpdate()">
               <option *ngFor="let customColumnDataType of customColumnDataTypes" [value]="customColumnDataType"
                 selected="selectedElement.dataType === customColumnDataType">
                 {{customColumnDataType | titlecase}}
