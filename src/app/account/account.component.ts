@@ -4,13 +4,23 @@ import { hwAPI } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 import getFormAsDict from 'src/common/form';
 
+interface account {
+  email: string
+  firstName: string
+  lastName?: string
+}
+
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss']
 })
 export class AccountComponent implements OnInit {
-  oldAccountData: any = {}
+  oldAccountData: account = {
+    email: "",
+    firstName: ""
+
+  }
   AccountForm: FormGroup
   PasswordForm: FormGroup
   constructor(
@@ -29,6 +39,11 @@ export class AccountComponent implements OnInit {
     })
   }
 
+
+  typedKeys<T>(o: T): (keyof T)[] {
+    return Object.keys(o) as (keyof T)[];
+  }
+
   getAccountData = async() =>{
       const response = await this.hwAPI.fetch({
         query: `
@@ -41,7 +56,7 @@ export class AccountComponent implements OnInit {
         }`
       })
       this.oldAccountData = response.data.data.myAccount
-      Object.keys(this.oldAccountData).forEach((key)=>{
+      this.typedKeys(this.oldAccountData).forEach((key)=>{
         this.AccountForm.controls[key].setValue(this.oldAccountData[key])
       })
   }

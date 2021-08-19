@@ -1,12 +1,46 @@
 import { hwAPI } from 'src/common/api/api';
 import { Injectable } from '@angular/core';
-import { DataObject } from 'src/common/interfaces/request.interface';
+
+type elementsAllowedType = | "PRODUCTS" | "LOCATIONS";
+
+export enum dataTypesEnum {
+  TEXT = 'TEXT',
+  NUMBER = 'NUMBER',
+  DATE = 'DATE',
+  SELECT = 'SELECT'
+}
+
+export interface customColumn {
+  show?: boolean
+  id: string
+  index: number
+  customColumnName: string
+  dataType: dataTypesEnum
+  elementsAllowed: elementsAllowedType[]
+  values?: string[]
+}
+
+export interface customColumnParentNode {
+  node: customColumn
+}
+
+
+interface customColumnValue {
+  id: string
+  customColumn: customColumn
+  value: string
+}
+
+export interface customColumnValueParentNode {
+  node: customColumnValue
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomColumnsService {
-  customColumns: any[] = [];
+  customColumns: customColumnParentNode[] = [];
   constructor(
     private hwAPI: hwAPI
   ) { }
@@ -29,30 +63,22 @@ export class CustomColumnsService {
         }
       }`
     })
-    this.customColumns = response.data.data.customColumnsList.edges.map((parentNode: any)=>{
+    this.customColumns = response.data.data.customColumnsList.edges.map((parentNode: customColumnParentNode)=>{
       return {node: {...parentNode.node, show: true}}
     }).sort((a:any, b:any) => a.node.index - b.node.index)
   }
 
 
 
-  findCustomColumnValue = (customId: string, customValues: any) => {
-    const value: any =  customValues.find((parentNode: any)=> {
-        if (parentNode.node.customColumn.id === customId){
-          return parentNode.node.value
-        }
-    })
-    if(value){
-      return value.node.value
-    } else {
-      return null
-    }
+  findCustomColumnValue = (customId: string, customColumnsValues: customColumnValueParentNode[]) => {
+    const value =  customColumnsValues.find((parentNode: customColumnValueParentNode)=> parentNode.node.customColumn.id === customId)?.node.value
+    return value
   }
 
   findCustomColumnModel = (selectedElement: any, customId: string) => {
     if(selectedElement.customColumns){
       if(selectedElement.customColumns.edges){
-        const value = selectedElement.customColumns.edges.find((parentNode:any)=>{
+        const value = selectedElement.customColumns.edges.find((parentNode: customColumnValueParentNode)=>{
           return parentNode.node.customColumn.id === customId
         })
         if(value){
@@ -63,7 +89,7 @@ export class CustomColumnsService {
     return ""
   }
 
-  updateCustomColumnsIndexes = async() => {
+  updateCustomColumnsIndexesAPI = async() => {
     this.customColumns = this.customColumns.map((parentNode: any, index: number)=>{
       return {node: {...parentNode.node, index}}
     })
@@ -87,28 +113,28 @@ export class CustomColumnsService {
   }
 
 
-  updateCustomColumnModel = async(selectedElement: any, columnModelNode?: any, event?: any) => {
+  updateCustomColumnModel = async(selectedElement: any, columnModelNode?: customColumn, event?: any) => {
     if(!selectedElement.customColumns){
       selectedElement.customColumns.edges = [
         {node:{
           customColumn: {
-            id: columnModelNode.id,
-            customColumnName: columnModelNode.customColumnName
+            id: columnModelNode?.id,
+            customColumnName: columnModelNode?.customColumnName
           },
           value: event
         }}
       ]
     }
     const value = selectedElement.customColumns.edges.find((parentNode:any)=>{
-      return parentNode.node.customColumn.id === columnModelNode.id
+      return parentNode.node.customColumn.id === columnModelNode?.id
     })
     if(value){
       value.node.value = event
     } else {
       selectedElement.customColumns.edges.push({node:{
         customColumn: {
-          id: columnModelNode.id,
-          customColumnName: columnModelNode.customColumnName
+          id: columnModelNode?.id,
+          customColumnName: columnModelNode?.customColumnName
         },
         value: event
       }})
@@ -117,13 +143,11 @@ export class CustomColumnsService {
   }
 
 
-
-  saveNewCustomColumnAPI = async(selectedElement: any, customColumnDetails: any) => {
-    console.log(customColumnDetails)
+  saveNewCustomColumnAPI = async(selectedElement: any, customColumnDetails: customColumn) => {
     // Create product
     const responseCustomColumn = await this.hwAPI.fetch({
       query: `
-      mutation createCustomColumn($customColumnDetails: CustomColumnInput!){
+      mutation createCustomColumn($customColumnDetails: CreatingCustomColumnInput!){
         createCustomColumn(customColumnDetails: $customColumnDetails){
           customColumn{
             id
@@ -132,7 +156,7 @@ export class CustomColumnsService {
       }
       `,
       variables: {
-        customColumnDetails: customColumnDetails
+        customColumnDetails
       }
     })
     // Update ID

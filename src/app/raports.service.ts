@@ -1,11 +1,52 @@
 import { Injectable } from '@angular/core';
 import { hwAPI } from 'src/common/api/api';
+import { customColumn, customColumnParentNode } from './custom-columns.service';
+
+
+interface filterBy {
+  node: {
+    customColumn: customColumn
+    comparison: string
+    value: string
+  }
+}
+
+interface sortBy {
+  node: {
+    id: string
+    customColumn: customColumn
+    comparison: string
+    value: string
+  }
+}
+
+interface raport {
+  id: string
+  raportName: string
+  description: string
+  showCustomColumns: {
+    edges: customColumnParentNode[]
+  }
+  sortBy: sortBy
+  filterBy: {
+    edges: filterBy[]
+  }
+  shortResults: number
+  productsList?: any
+  customColumns?: any
+}
+
+export interface raportParentNode {
+  node: raport
+}
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class RaportsService {
-  raportsList: any = [];
+  raportsList: raport[] = [];
 
   constructor(
     private hwAPI: hwAPI
@@ -43,7 +84,7 @@ export class RaportsService {
                 edges{
                   node{
                     id
-                    customColumns
+                    customColumnName
                   }
                 }
               }

@@ -1,14 +1,55 @@
 import { hwAPI } from 'src/common/api/api';
 import { Injectable } from '@angular/core';
+import { customColumnParentNode } from './custom-columns.service';
+
+
+
+interface product {
+  id: string
+  productName: string
+  description: string
+  icon: string
+  customColumns: {
+    edges: customColumnParentNode[]
+  }
+}
+
+interface productParentNode {
+  node: product
+}
+
+interface location {
+  parent?: string
+  id: string
+  root: boolean
+  locationName: string
+  products: {
+    edges: productParentNode[]
+  }
+  childrens: {
+    edges: locationParentNode[]
+  }
+  custom_columns: {
+   edges: customColumnParentNode[]
+  }
+}
+
+export interface locationParentNode {
+  node: location
+}
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationsService {
-  elements: any[] = [];
+  elements: locationParentNode[] = [];
+
   constructor(
     private hwAPI: hwAPI
   ) { }
+
   queryLocations = async(rootLocationId: string | null) => {
 
     const response = await this.hwAPI.fetch({
@@ -76,8 +117,8 @@ export class LocationsService {
   }
 
 
-  // Recursive functions
-  updateRecNested = (searchingIn:any, subType: string, element: any, parentId: string) => {
+  // Recursive functions for locations and products
+  updateRecNested = (searchingIn:any, subType: "products" | "childrens", element: location | product, parentId: string) => {
     if(searchingIn.id === parentId){
       if(searchingIn[subType].edges){
         searchingIn[subType].edges.push({node: element})
@@ -96,7 +137,7 @@ export class LocationsService {
     }
   }
 
-  deleteRecNested = (searchingIn:any, selectedElement:any, subType: string) => {
+  deleteRecNested = (searchingIn:any, subType: "products" | "childrens", selectedElement: location | product) => {
     if(subType==='childrens'){
       if(searchingIn.node === selectedElement){
         delete searchingIn.node
@@ -105,7 +146,7 @@ export class LocationsService {
         if(searchingIn.node?.childrens?.edges){
           for (let parentNode of searchingIn.node.childrens.edges){
             searchingIn = parentNode
-            this.deleteRecNested(searchingIn, selectedElement, subType)
+            this.deleteRecNested(searchingIn, subType, selectedElement)
           }
         }
       }
@@ -115,7 +156,7 @@ export class LocationsService {
         if(searchingIn.node.childrens){
           for (let parentNode of searchingIn.node.childrens.edges){
             searchingIn = parentNode
-            this.deleteRecNested(searchingIn, selectedElement, subType)
+            this.deleteRecNested(searchingIn, subType, selectedElement)
         }
       }
     }
@@ -125,12 +166,12 @@ export class LocationsService {
 
 
   // API calls
-  saveNewProductAPI = async(selectedElement:any, productDetails: any) => {
+  saveNewProductAPI = async(selectedElement: location, productDetails: product) => {
 
     // Create product
     const responseProduct = await this.hwAPI.fetch({
       query: `
-      mutation createProd($productDetails: ProductInput!){
+      mutation createProd($productDetails: CreatingProductInput!){
         createProduct(productDetails: $productDetails){
           product{
             id
@@ -147,8 +188,8 @@ export class LocationsService {
     // Update parent location
     const responseParent = await this.hwAPI.fetch({
       query: `
-      mutation modLocation($parent_id: String!, $product_id: ID!){
-        modifyLocation(id:$parent_id, locationDetails: {products: [$product_id]}){
+      mutation modLocation($parent_id: ID!, $product_id: ID!){
+        modifyLocation(locationDetails: {id:$parent_id, products: [$product_id]}){
           modified
         }
       }
@@ -164,9 +205,8 @@ export class LocationsService {
     selectedElement.id = responseProduct.data.data.createProduct.product.id
   }
 
-  saveNewSubLocationAPI = async(selectedElement:any, locationDetails: any) => {
-        // Create sub location
-        const responseSub = await this.hwAPI.fetch({
+  saveNewLocationAPI = async(selectedElement: location, locationDetails: location) => {
+      const response = await this.hwAPI.fetch({
           query: `
           mutation createLoc($locationDetails: CreatingLocationInput!){
             createLocation(locationDetails: $locationDetails){
@@ -182,25 +222,25 @@ export class LocationsService {
         })
 
 
+          // If created location has parent -> update parent location
         if(selectedElement.parent){
-          // Update parent location
           const responseParent = await this.hwAPI.fetch({
             query: `
-            mutation modLocation($parent_id: String!, $child_id: ID!){
-              modifyLocation(id:$parent_id, locationDetails: {childrens: [$child_id]}){
+            mutation modLocation($parent_id: ID!, $child_id: ID!){
+              modifyLocation(locationDetails: {id: $parent_id, childrens: [$child_id]}){
                 modified
               }
             }
             `,
             variables: {
               parent_id: selectedElement.parent,
-              child_id: responseSub.data.data.createLocation.location.id
+              child_id: response.data.data.createLocation.location.id
             }
           })
         }
         delete selectedElement.parent
 
         // Update ID
-        selectedElement.id = responseSub.data.data.createLocation.location.id
+        selectedElement.id = response.data.data.createLocation.location.id
   }
 }
