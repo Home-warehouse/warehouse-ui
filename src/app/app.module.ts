@@ -19,6 +19,9 @@ import { LocationsManagerComponent } from './locations-manager/locations-manager
 import { RaportDisplayComponent } from './raport-display/raport-display.component';
 import { AutomatizationsListComponent } from './automatizations-list/automatizations-list.component';
 import { AutomatizationFormComponent } from './automatization-form/automatization-form.component';
+import { ActivateAccountComponent } from './activate-account/activate-account.component';
+import { UserManagingComponent } from './user-managing/user-managing.component';
+import { AddUserComponent } from './user-managing/add-user/add-user.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +39,9 @@ import { AutomatizationFormComponent } from './automatization-form/automatizatio
     RaportDisplayComponent,
     AutomatizationsListComponent,
     AutomatizationFormComponent,
+    ActivateAccountComponent,
+    UserManagingComponent,
+    AddUserComponent,
   ],
   imports: [
     DragDropModule,

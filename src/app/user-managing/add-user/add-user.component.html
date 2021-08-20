@@ -1,0 +1,35 @@
+<form [formGroup]="SignUpForm" (ngSubmit)="onSignUpSubmit()">
+  <div class="field">
+    <label class="label">Email*</label>
+    <div class="control">
+      <input class="input" autocomplete="email" type="email" placeholder="Email" formControlName="email" name="email"
+        [ngClass]="{'is-danger': SignUpForm.controls?.email?.invalid && SignUpForm.controls?.email?.touched}">
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Name*</label>
+    <div class="control">
+      <input class="input" autocomplete="given-name" type="text" placeholder="First name" formControlName="firstName"
+        name="firstName"
+        [ngClass]="{'is-danger': SignUpForm.controls?.firstName?.invalid && SignUpForm.controls?.firstName?.touched}">
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Last Name</label>
+    <div class="control">
+      <input class="input" autocomplete="family-name" type="text" placeholder="Last name" formControlName="lastName"
+        name="lastName">
+    </div>
+  </div>
+  <div class="field">
+    <label class="label">Password*</label>
+    <div class="control">
+      <input class="input" autocomplete="new-password" type="password" placeholder="Password" formControlName="password"
+        name="password">
+      <p *ngIf="SignUpForm.controls?.password?.invalid && SignUpForm.controls?.password?.dirty" class="help is-danger">
+        Minimum lenght of password is 5 characters
+      </p>
+    </div>
+  </div>
+  <input type="submit" [disabled]="!SignUpForm.valid" class="button is-primary" value="Register">
+</form>

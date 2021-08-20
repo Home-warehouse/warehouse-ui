@@ -26,9 +26,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if(!this.auth.isLoggedIn()){
-      this.logout()
-    } else {
+    if(this.auth.isLoggedIn()){
       this.auth.updateToken()
     }
   }

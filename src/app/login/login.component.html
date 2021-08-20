@@ -1,62 +1,22 @@
-<div class="columns horizontal">
-  <!-- Sign In -->
-  <div class="column is-12-mobile is-5-tablet is-offset-1-widescreen is-2-fullhd is-offset-3-fullhd">
-    <h1 class="is-size-2 my-5">Sign In</h1>
-    <form [formGroup]="SignInForm" (ngSubmit)="onSignInSubmit()">
-      <div class="field">
-        <label class="label">Email</label>
-        <div class="control">
-          <input class="input" autocomplete="email" type="email" placeholder="Email" formControlName="email"
-            [ngClass]="{'is-danger': SignInForm.controls?.email?.invalid}" name="email">
-        </div>
+<div class="column is-12-mobile is-5-tablet is-offset-3-widescreen is-3-fullhd is-offset-4-fullhd">
+  <h1 class="is-size-2 my-5">Sign In</h1>
+  <form [formGroup]="SignInForm" (ngSubmit)="onSignInSubmit()">
+    <div class="field">
+      <label class="label">Email</label>
+      <div class="control">
+        <input class="input" autocomplete="email" type="email" placeholder="Email" formControlName="email"
+          [ngClass]="{'is-danger': SignInForm.controls?.email?.invalid}" name="email">
       </div>
-      <div class="field">
-        <label class="label">Password</label>
-        <div class="control">
-          <input class="input" autocomplete="current-password" type="password" placeholder="Password" formControlName="password"
-            [ngClass]="{'is-danger': SignInForm.controls?.password?.invalid && SignInForm.controls?.password?.dirty}"
-            name="password">
-        </div>
+    </div>
+    <div class="field">
+      <label class="label">Password</label>
+      <div class="control">
+        <input class="input" autocomplete="current-password" type="password" placeholder="Password"
+          formControlName="password"
+          [ngClass]="{'is-danger': SignInForm.controls?.password?.invalid && SignInForm.controls?.password?.dirty}"
+          name="password">
       </div>
-      <input type="submit" class="button is-primary" value="Login">
-    </form>
-  </div>
-
-  <!-- SignUp -->
-  <div class="column is-12-mobile is-5-tablet is-offset-1-tablet is-offset-1-widescreen is-2-fullhd is-offset-1-fullhd">
-    <h1 class="is-size-2 my-5">Sign Up</h1>
-    <form [formGroup]="SignUpForm" (ngSubmit)="onSignUpSubmit()">
-      <div class="field">
-        <label class="label">Email*</label>
-        <div class="control">
-          <input class="input" autocomplete="email" type="email" placeholder="Email" formControlName="email" name="email"
-            [ngClass]="{'is-danger': SignUpForm.controls?.email?.invalid && SignUpForm.controls?.email?.touched}">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Name*</label>
-        <div class="control">
-          <input class="input" autocomplete="given-name" type="text" placeholder="First name" formControlName="firstName" name="firstName"
-            [ngClass]="{'is-danger': SignUpForm.controls?.firstName?.invalid && SignUpForm.controls?.firstName?.touched}">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Last Name</label>
-        <div class="control">
-          <input class="input" autocomplete="family-name" type="text" placeholder="Last name" formControlName="lastName" name="lastName">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Password*</label>
-        <div class="control">
-          <input class="input" autocomplete="new-password" type="password" placeholder="Password" formControlName="password" name="password">
-          <p *ngIf="SignUpForm.controls?.password?.invalid && SignUpForm.controls?.password?.dirty"
-            class="help is-danger">
-            Minimum lenght of password is 5 characters
-          </p>
-        </div>
-      </div>
-      <input type="submit" [disabled]="!SignUpForm.valid" class="button is-primary" value="Register">
-    </form>
-  </div>
+    </div>
+    <input type="submit" class="button is-primary" value="Login">
+  </form>
 </div>
