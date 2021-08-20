@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { User, UsersService } from '../users.service';
+import { NotificationsSharedService } from '../notifications/notifications.sharedService';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-user-managing',
@@ -9,7 +10,8 @@ import { User, UsersService } from '../users.service';
 export class UserManagingComponent implements OnInit {
   creatingUser = false
   constructor(
-    public usersService: UsersService
+    public usersService: UsersService,
+    private notifications: NotificationsSharedService,
   ) {}
 
   getUserProperties = (user: any) => {
@@ -21,6 +23,21 @@ export class UserManagingComponent implements OnInit {
   initialQuery = async() => {
     const result = await this.usersService.queryUsersList()
     this.usersService.usersList = result.data.data.accountsList.edges
+  }
+
+  deleteUser = async(id: string)=>{
+    const result = await this.usersService.deleteUser(id)
+    if(result.data.data.deleteAccount.deleted){
+      this.notifications.sendOpenNotificationEvent({
+        message: `Account deleted successfully.`,
+         type: 'SUCCESS'
+      });
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Could not delete account, try again.`,
+         type: 'ERROR'
+      });
+    }
   }
 
   ngOnInit(): void {

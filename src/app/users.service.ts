@@ -43,4 +43,21 @@ export class UsersService {
       })
       return response
   }
+
+  deleteUser = async(id: string) => {
+    const response = await this.hwAPI.fetch({
+      query: `mutation Account_delete($id: ID!){
+        deleteAccount(id: $id){
+          deleted
+        }
+      }`,
+      variables: {
+        id
+      }
+      })
+      if(response.data.data.deleteAccount.deleted){
+        this.usersList = this.usersList.filter((user: userParentNode) => user.node.id !== id)
+      }
+      return response
+  }
 }
