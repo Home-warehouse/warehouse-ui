@@ -4,6 +4,9 @@ import { hwAPI } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 
+import { environment } from 'src/environments/environment';
+const integrations = environment.intergrations;
+
 @Component({
   selector: 'app-automatization-form',
   templateUrl: './automatization-form.component.html',
@@ -15,7 +18,7 @@ export class AutomatizationFormComponent implements OnInit {
   @Output() hideModal = new EventEmitter()
 
   AutomatizationForm: FormGroup;
-  apps = ["EVERNOTE"]
+  apps: string[] = []
   configs = {
     evernote: [
       {
@@ -113,7 +116,16 @@ export class AutomatizationFormComponent implements OnInit {
     }
   }
 
+  typedKeys<T>(o: T): (keyof T)[] {
+    return Object.keys(o) as (keyof T)[];
+  }
+
   ngOnInit(): void {
+    integrations.forEach((el: {name: string, integrated: boolean})=>{
+      if(el.integrated){
+        this.apps.push(el.name)
+      }
+    })
     this.onChangeApp()
   }
 
