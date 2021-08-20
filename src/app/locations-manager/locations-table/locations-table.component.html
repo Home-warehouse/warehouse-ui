@@ -2,11 +2,6 @@
   <table class="table">
     <thead>
       <tr>
-        <th>
-          <label class="checkbox">
-            <input type="checkbox">
-          </label>
-        </th>
         <th>Name</th>
         <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns"
           (click)="onElementSelectEvent(customColumnParentNode.node)">
@@ -16,7 +11,7 @@
           </th>
         </ng-container>
         <th>Actions</th>
-        <th (click)="onNewElementInitEvent('customColumn')"><i class="ph-plus"></i>Add column</th>
+        <th (click)="onNewElementInitEvent('customColumn')"><button class="button is-info is-light">Add column</button></th>
       </tr>
     </thead>
     <tbody>
@@ -33,11 +28,6 @@
   let-parentLocationNameLocal="parentLocationNameLocal">
   <!-- Products row -->
   <tr *ngFor="let parentNode of list" [ngClass]="{'is-selected': selectedElement==parentNode.node}">
-    <td (click)="onElementSelectEvent(parentNode.node, parentLocationNameLocal)">
-      <label class="checkbox">
-        <input type="checkbox">
-      </label>
-    </td>
     <td (click)="onElementSelectEvent(parentNode.node, parentLocationNameLocal)">
       <p style="{{'margin-left: '+ i + 'px'}}">{{parentNode.node.productName}}</p>
     </td>
@@ -60,13 +50,6 @@
       <!-- Location row -->
       <tr
         [ngClass]="{'is-selected': selectedElement==parentNode.node, 'has-background-grey-lighter': selectedElement!=parentNode.node}">
-        <td (click)="onElementSelectEvent(parentNode.node, parentLocationNameLocal)">
-          <div class="my-2">
-            <label class="checkbox">
-              <input type="checkbox">
-            </label>
-          </div>
-        </td>
         <td (click)="onElementSelectEvent(parentNode.node, parentLocationNameLocal)">
           <p style="{{'margin-left: '+ i + 'px'}}" class="my-2">
             <ng-container *ngIf="i!==1"><i class="ph-arrow-bend-down-right"></i></ng-container>

@@ -1,4 +1,7 @@
 .notification {
-  max-width: 550px;
   position: absolute;
+  max-width: 80%;
+  @media screen and (min-width: 600px) {
+    max-width: 350px;
+  }
 }

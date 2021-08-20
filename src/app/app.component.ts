@@ -9,6 +9,7 @@ import { AuthService } from 'src/common/auth/auth.service';
 })
 export class AppComponent implements OnInit {
   title = 'Home Warehouse';
+  mobileNavOpen = false;
   isLogged: Boolean = false;
 
   constructor(
@@ -18,6 +19,9 @@ export class AppComponent implements OnInit {
     router.events.subscribe((e) =>{
       this.isLogged = auth.isLoggedIn()
     })
+  }
+  toggleMobileNav=()=>{
+    this.mobileNavOpen = !this.mobileNavOpen
   }
 
   logout = () =>{

@@ -1,6 +1,6 @@
 <div
   *ngIf="displayNotification"
-  class="notification is-primary is-size-6"
+  class="notification is-primary"
   [ngClass]="{'is-danger': notificationType === 'ERROR' }"
   >
   <button (click)="closeNotification()" class="delete"></button>

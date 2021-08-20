@@ -1,12 +1,13 @@
 <div class="columns">
   <!-- Elements -->
   <div class="column is-12-mobile is-6-tablet is-8-widescreen is-7-fullhd">
+    <p class="mt-5" *ngIf="locationsService.elements.length === 0">Start adding your first locations and products using button below/</p>
+    <button class="button is-small is-primary is-light mx-1 my-4" (click)="onNewElementInitEvent('location')">Add Root
+      Location</button>
     <app-locations-table [customColumnsService]="customColumnsService" [locationsService]="locationsService"
       [selectedElement]="selectedElement" (onElementSelect)="onElementSelect($event)"
       (onNewElementInit)="onNewElementInit($event)">
     </app-locations-table>
-    <button class="button is-small is-info is-light mx-1 mt-1" (click)="onNewElementInitEvent('location')">Add Root
-      Location</button>
   </div>
 
   <!-- Manager -->
@@ -29,10 +30,11 @@
 
     <!-- Manage columns -->
     <div *ngIf="showColumnsManage">
+      <button class="button is-small is-info is-light my-2" (click)="onNewElementInitEvent('customColumn')">Add column</button>
       <table class="table">
         <thead>
           <tr>
-            <th></th>
+            <th>#</th>
             <th>Name</th>
             <th>Actions</th>
           </tr>
@@ -134,7 +136,7 @@
         </div>
 
         <!-- Custom Columns For locations and products -->
-        <div class="my-5">
+        <div class="my-5" *ngIf="showCC()">
           <h3 class="is-size-4">Custom Columns</h3>
           <div class="field" *ngFor="let customColumnParentNode of customColumnsService.customColumns">
             <ng-container *ngIf="
@@ -168,9 +170,8 @@
       <div class="my-4">
         <!-- Actions -->
         <button *ngIf="selectedElement.hasOwnProperty('parent') || isCreatingNewElement" class="button is-primary"
-          (click)="onNewElementSave()">Add new element</button>
-        <button *ngIf="!isCreatingNewElement" class="button is-danger" (click)="onElementDelete()">Delete
-          element</button>
+          (click)="onNewElementSave()">Add</button>
+        <button *ngIf="!isCreatingNewElement" class="button is-danger" (click)="onElementDelete()">Delete</button>
       </div>
     </div>
   </div>
