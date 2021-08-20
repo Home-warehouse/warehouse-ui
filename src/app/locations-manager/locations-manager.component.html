@@ -97,11 +97,11 @@
             </select>
           </div>
         </div>
-        <div *ngIf="selectedElement.dataType=='select'" class="field">
+        <div *ngIf="selectedElement.dataType=='SELECT'" class="field">
           <label class="label">Values</label>
           <div *ngFor="let value of selectedElement.values; let i = index;  trackBy: trackForCCvalues">
             <div class="control is-flex is-align-items-baseline">
-              <i (click)="removeCustomColumnValue(i)" class="ph-x"></i>
+              <i (click)="removeCustomColumnValue(i); onElementUpdate()" class="ph-x"></i>
               <input class="input" type="text" [(ngModel)]="selectedElement.values[i]" (ngModelChange)="onElementUpdate()" />
             </div>
           </div>
