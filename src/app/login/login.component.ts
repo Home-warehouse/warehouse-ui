@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import { hwAPI } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 import { Router } from "@angular/router"
+import jwtDecode from 'jwt-decode';
 import getFormAsDict from 'src/common/form';
 
 @Component({
@@ -11,7 +12,6 @@ import getFormAsDict from 'src/common/form';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  SignUpForm: FormGroup;
   SignInForm: FormGroup;
   constructor(
     private fb: FormBuilder,
@@ -19,39 +19,10 @@ export class LoginComponent implements OnInit {
     private notifications: NotificationsSharedService,
     private hwAPI: hwAPI,
   ) {
-    this.SignUpForm = this.fb.group({
-      email: new FormControl('', [Validators.email, Validators.required]),
-      firstName: new FormControl('', [Validators.required]),
-      lastName: new FormControl(''),
-      password: new FormControl('', [Validators.minLength(5), Validators.required])
-    });
     this.SignInForm = this.fb.group({
       email: new FormControl('', Validators.email),
       password: new FormControl('', Validators.required)
     });
-  }
-
-  onSignUpSubmit = async () => {
-    let formDict = getFormAsDict(this.SignUpForm)
-    const response = await this.hwAPI.fetch({
-      query: `mutation createAccount($accountDetails: CreatingAccountInput!){
-        createAccount(accountDetails: $accountDetails){
-          created
-        }
-      }`,
-      variables: {accountDetails: formDict}
-    })
-    if(response.data.data.createAccount.created){
-      this.notifications.sendOpenNotificationEvent({
-        message: `Registered successfully - now you can login`,
-         type: 'SUCCESS'
-      });
-    } else {
-      this.notifications.sendOpenNotificationEvent({
-        message: `Could not register, try again or ask administrator for further help`,
-         type: 'ERROR'
-      });
-    }
   }
 
   onSignInSubmit = async () => {
@@ -59,8 +30,9 @@ export class LoginComponent implements OnInit {
     const response = await this.hwAPI.fetch({
       query: `query login($email: String, $password: String){
         login(email: $email, password: $password){
-          authenticated,
+          authenticated
           accessToken
+          newAccount
         }
       }`,
       variables: formDict
@@ -69,7 +41,11 @@ export class LoginComponent implements OnInit {
       const accessToken = response.data.data.login.accessToken
       if (accessToken){
         localStorage.setItem("accessToken", accessToken)
-        this.router.navigate(['/dashboard'])
+        if(response.data.data.login.newAccount){
+          this.router.navigate(['/activate-account'])
+        } else {
+          this.router.navigate(['/dashboard'])
+        }
       } else {
         this.notifications.sendOpenNotificationEvent({
           message: `Could not login - check if you used correct credentials`,

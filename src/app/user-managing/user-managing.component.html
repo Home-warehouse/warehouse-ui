@@ -1,0 +1,44 @@
+<h1 class="is-size-2 my-6">User managing</h1>
+<a class="button is-primary is-inverted" (click)="creatingUser=true">Add new user</a>
+
+<ng-container *ngIf="usersService.usersList.length > 0">
+  <div class="columns">
+    <ng-container *ngFor="let parentNode of usersService.usersList">
+      <div class="column is-3">
+        <div class="box">
+          <table>
+            <tbody>
+              <ng-container *ngFor="let property of getUserProperties(parentNode.node)">
+                <tr>
+                  <td>{{property.name | titlecase}}</td>
+                  <td class="pl-4">{{property.value}}</td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+          <!-- <h3 class="is-size-5 mt-4">Actions</h3>
+          <div>
+            <button class="button is-danger">
+              Delete Account
+            </button>
+          </div> -->
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+
+<div [ngClass]="{'is-active': creatingUser}" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-content">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Adding user</p>
+      <button (click)="creatingUser=false" class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <app-add-user (hideModal)="creatingUser=false">
+      </app-add-user>
+    </section>
+  </div>
+</div>
