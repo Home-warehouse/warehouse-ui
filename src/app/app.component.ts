@@ -20,12 +20,18 @@ export class AppComponent implements OnInit {
       this.isLogged = auth.isLoggedIn()
     })
   }
+
+  getRank=()=>{
+    return localStorage.getItem("rank")
+  }
+
   toggleMobileNav=()=>{
     this.mobileNavOpen = !this.mobileNavOpen
   }
 
   logout = () =>{
     localStorage.removeItem("accessToken")
+    localStorage.removeItem("rank")
     this.router.navigate(['/login'])
   }
 

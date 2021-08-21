@@ -2,16 +2,15 @@
   <table class="table">
     <thead>
       <tr>
-        <th>Name</th>
+        <th class="is-vcentered">Name</th>
         <ng-container *ngFor="let customColumnParentNode of customColumnsService.customColumns"
           (click)="onElementSelectEvent(customColumnParentNode.node)">
-          <th [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
+          <th class="is-vcentered" [ngClass]="{'is-selected': selectedElement==customColumnParentNode.node}"
             (click)="onElementSelectEvent(customColumnParentNode.node)" *ngIf="customColumnParentNode.node.show">
             {{customColumnParentNode.node.customColumnName}}
           </th>
         </ng-container>
-        <th>Actions</th>
-        <th (click)="onNewElementInitEvent('customColumn')"><button class="button is-info is-light">Add column</button></th>
+        <th class="is-flex is-justify-content-center is-vcentered" (click)="onNewElementInitEvent('customColumn')"><button class="button is-info is-light">Add column</button></th>
       </tr>
     </thead>
     <tbody>

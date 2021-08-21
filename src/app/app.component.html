@@ -31,7 +31,7 @@
         <b>Home Warehouse</b>
       </b>
       by <b>Daniel Goliszewski <i>@tafeen</i></b>
-      under MIT License.
+      under GNU GPL-2.0 License.
     </p>
   </div>
 </footer>
@@ -46,6 +46,8 @@
         routerLinkActive="is-light">Automatizations</a></p>
     <p class="level-item" *ngIf="isLogged"><a routerLink="/account" class="button is-primary is-inverted"
         routerLinkActive="is-light">Account</a></p>
+    <p class="level-item" *ngIf="isLogged && getRank() === 'admin'"><a routerLink="/user-managing" class="button is-primary is-inverted"
+      routerLinkActive="is-light">User managing</a></p>
     <p class="level-item" *ngIf="isLogged"><a (click)="logout()" class="button is-danger is-inverted">Logout</a></p>
     <p class="level-item" *ngIf="!isLogged"><a routerLink="/login" class="button is-info is-inverted"
         routerLinkActive="is-light">Login</a></p>

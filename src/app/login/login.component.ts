@@ -6,6 +6,12 @@ import { Router } from "@angular/router"
 import jwtDecode from 'jwt-decode';
 import getFormAsDict from 'src/common/form';
 
+interface token {
+  client_id: string
+  rank: "admin" | "user"
+  exp: number
+}
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -38,9 +44,12 @@ export class LoginComponent implements OnInit {
       variables: formDict
     })
     if(response.data){
+      let tokenParsed: token
       const accessToken = response.data.data.login.accessToken
+      tokenParsed = jwtDecode(accessToken)
       if (accessToken){
         localStorage.setItem("accessToken", accessToken)
+        localStorage.setItem("rank", tokenParsed.rank)
         if(response.data.data.login.newAccount){
           this.router.navigate(['/activate-account'])
         } else {
