@@ -44,10 +44,10 @@ export class LoginComponent implements OnInit {
       variables: formDict
     })
     if(response.data){
-      let tokenParsed: token
-      const accessToken = response.data.data.login.accessToken
-      tokenParsed = jwtDecode(accessToken)
-      if (accessToken){
+      if(response.data.data.login.authenticated){
+        let tokenParsed: token
+        const accessToken = response.data.data.login.accessToken
+        tokenParsed = jwtDecode(accessToken)
         localStorage.setItem("accessToken", accessToken)
         localStorage.setItem("rank", tokenParsed.rank)
         if(response.data.data.login.newAccount){
