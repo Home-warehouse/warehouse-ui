@@ -8,7 +8,7 @@ export const environment = {
   intergrations: [
     {
       name: 'EVERNOTE',
-      integrated: false
+      integrated: true
     }
   ]
 };

@@ -157,18 +157,17 @@ export class LocationsManagerComponent implements OnInit {
 
         // If element is location
         this.startSync(this.selectedElement.locationName)
-        const { customColumns, childrens, id, products, ...locationDet } = this.selectedElement
+        const { customColumns, childrens, products, ...locationDet } = this.selectedElement
 
         const responseUpdate = await this.hwAPI.fetch({
           query: `
-          mutation modLocation($id: String!, $locationDetails: LocationInput!){
-            modifyLocation(id:$id, locationDetails: $locationDetails){
+          mutation modLocation($locationDetails: LocationInput!){
+            modifyLocation(locationDetails: $locationDetails){
               modified
             }
           }
           `,
           variables: {
-            id: this.selectedElement.id,
             locationDetails: {...locationDet, customColumns: customColumnsArr},
           }
         })
@@ -332,6 +331,19 @@ export class LocationsManagerComponent implements OnInit {
         await this.locationsService.saveNewLocationAPI(this.selectedElement, {...locationDet, customColumns: customColumnsArr})
     }
     this.isCreatingNewElement = false
+  }
+
+
+  // Show Custom Columns Values for element
+  showCC = () => {
+      let elementType: "PRODUCTS" | "LOCATIONS";
+      if(this.selectedElement.hasOwnProperty('productName')){
+        elementType = 'PRODUCTS'
+      } else {
+        elementType = 'LOCATIONS'
+      }
+     const res = this.customColumnsService.customColumns.find((el: customColumnParentNode) => el.node.elementsAllowed.includes(elementType))
+     return res
   }
 
   // CREATE CC VALUE

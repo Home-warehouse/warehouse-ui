@@ -9,6 +9,7 @@ import { AuthService } from 'src/common/auth/auth.service';
 })
 export class AppComponent implements OnInit {
   title = 'Home Warehouse';
+  mobileNavOpen = false;
   isLogged: Boolean = false;
 
   constructor(
@@ -20,8 +21,17 @@ export class AppComponent implements OnInit {
     })
   }
 
+  getRank=()=>{
+    return localStorage.getItem("rank")
+  }
+
+  toggleMobileNav=()=>{
+    this.mobileNavOpen = !this.mobileNavOpen
+  }
+
   logout = () =>{
     localStorage.removeItem("accessToken")
+    localStorage.removeItem("rank")
     this.router.navigate(['/login'])
   }
 
