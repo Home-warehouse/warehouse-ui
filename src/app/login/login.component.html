@@ -5,15 +5,16 @@
       <label class="label">Email</label>
       <div class="control">
         <input class="input" autocomplete="email" type="email" placeholder="Email" formControlName="email"
-          [ngClass]="{'is-danger': SignInForm.controls?.email?.invalid}" name="email">
+          [ngClass]="{'is-danger': SignInForm.controls?.email?.invalid}" (change)="SignInForm.controls.email.setValue(updateValueOnChange($event))" name="email">
       </div>
     </div>
     <div class="field">
       <label class="label">Password</label>
       <div class="control">
-        <input class="input" autocomplete="current-password" type="password" placeholder="Password"
+        <input class="input" autocomplete="password" type="password" placeholder="Password"
           formControlName="password"
           [ngClass]="{'is-danger': SignInForm.controls?.password?.invalid && SignInForm.controls?.password?.dirty}"
+          (change)="SignInForm.controls.password.setValue(updateValueOnChange($event))"
           name="password">
       </div>
     </div>

@@ -31,6 +31,12 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  // Autofill fix
+  updateValueOnChange(event: Event) {
+    const target = event.target as HTMLInputElement
+    return target.value
+  }
+
   onSignInSubmit = async () => {
     let formDict = getFormAsDict(this.SignInForm)
     const response = await this.hwAPI.fetch({
