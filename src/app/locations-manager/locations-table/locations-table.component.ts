@@ -17,6 +17,7 @@ export class LocationsTableComponent implements OnInit {
   @Output() public onElementSelect: EventEmitter<any> = new EventEmitter<any>();
   @Output() onNewElementInit: EventEmitter<any> = new EventEmitter<any>();
 
+  showChildrens = true;
 
   onElementSelectEvent(element: any, parentName?: string){
     this.onElementSelect.emit({element, parentName})

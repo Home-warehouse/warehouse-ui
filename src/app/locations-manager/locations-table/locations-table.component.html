@@ -1,3 +1,4 @@
+
 <div style="overflow-x: auto;">
   <table class="table">
     <thead>
@@ -63,23 +64,37 @@
           </td>
         </ng-container>
         <td>
-          <button class="button is-small is-warning is-light mx-1  mt-1"
+          <div class="is-inline-flex mx-4">
+            <ng-container *ngIf="parentNode.node.hideChildrens; else showChildrens">
+              <div (click)="parentNode.node.hideChildrens=false">
+                <i class="ph-caret-right"></i>
+              </div>
+            </ng-container>
+            <ng-template #showChildrens>
+              <div (click)="parentNode.node.hideChildrens=true">
+                <i class="ph-caret-double-down"></i>
+              </div>
+            </ng-template>
+          </div>
+          <div class="is-inline-flex">
+            <button class="button is-small is-warning is-light mx-1  mt-1" 
             (click)="onNewElementInitEvent('product', parentNode.node.id, parentNode.node.locationName)">Add
             Product</button>
           <button *ngIf="i<80" class="button is-small is-info is-light mx-1 mt-1"
             (click)="onNewElementInitEvent('location', parentNode.node.id, parentNode.node.locationName)">Add
             Location</button>
-        </td>
+          </div>
+          </td>
       </tr>
 
       <!-- Products -->
-      <ng-container *ngIf="parentNode.node.hasOwnProperty('products')">
+      <ng-container *ngIf="parentNode.node.hasOwnProperty('products') && !parentNode.node.hideChildrens">
         <ng-container
           *ngTemplateOutlet="productsListTmpl; context:{ productsList: parentNode.node.products.edges, index: i+10, parentLocationNameLocal: parentNode.node.locationName }">
         </ng-container>
       </ng-container>
       <!-- SubLocations -->
-      <ng-container *ngIf="parentNode.node.hasOwnProperty('childrens')">
+      <ng-container *ngIf="parentNode.node.hasOwnProperty('childrens') && !parentNode.node.hideChildrens">
         <ng-container
           *ngTemplateOutlet="recursiveLocationsListTmpl; context:{ locationsList: parentNode.node.childrens.edges, index: i+40, parentLocationNameLocal: parentNode.node.locationName}">
         </ng-container>
