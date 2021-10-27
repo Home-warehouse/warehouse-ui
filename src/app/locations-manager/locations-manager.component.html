@@ -31,7 +31,7 @@
   <div class="column is-12-mobile is-6-tablet is-4-widescreen is-4-fullhd is-offset-1-fullhd">
 
     <!-- Manage columns -->
-    <div *ngIf="showColumnsManage">
+    <div *ngIf="showColumnsManage" class="manager">
       <div class="is-flex is-justify-content-space-between">
         <h3 class="is-size-3">Manage columns</h3>
         <button class="delete is-large" (click)="showColumnsManage = false"></button>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Details -->
-    <div *ngIf="showDetails">
+    <div *ngIf="showDetails" class="manager">
       <div class="is-flex is-justify-content-space-between">
         <small>ID {{selectedElement?.id}} {{selectedElement?.newElement}}</small>
         <button class="delete is-large" (click)="showDetails = false; selectedElement=null"></button>
@@ -110,13 +110,13 @@
         <div *ngIf="selectedElement.dataType=='SELECT'" class="field">
           <label class="label">Values</label>
           <div *ngFor="let value of selectedElement.values; let i = index;  trackBy: trackForCCvalues">
-            <div class="control is-flex is-align-items-baseline">
-              <i (click)="removeCustomColumnValue(i); onElementUpdate()" class="ph-x"></i>
+            <div class="control is-flex is-align-items-baseline my-2">
+              <i (click)="removeCustomColumnValue(i); onElementUpdate()" class="ph-x px-2"></i>
               <input class="input" type="text" [(ngModel)]="selectedElement.values[i]"
                 (ngModelChange)="onElementUpdate()" />
             </div>
           </div>
-          <button class="button is-primary" (click)="addCustomColumnValue()">Add Value</button>
+          <button class="button is-primary mt-2" (click)="addCustomColumnValue()">Add Value</button>
         </div>
         <!-- Allowed elements -->
         <div class="field">

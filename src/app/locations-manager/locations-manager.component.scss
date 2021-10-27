@@ -3,3 +3,9 @@
     display: none;
   }
 }
+
+.manager {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 20px;
+}
