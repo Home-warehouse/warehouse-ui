@@ -1,8 +1,14 @@
 import { environment } from 'src/environments/environment';
-import Cookies from 'universal-cookie';
 import { RequestConfig, DataObject } from '../interfaces/request.interface';
 
 const API_ENDPOINT = environment.apiIP;
+
+export type result = {
+  status: number,
+  statusText: object | string,
+  headers?: object | any,
+  data?: object | any
+};
 
 const binaryContentTypesToBeSaved = [
   'image/png', 'image/jpeg', 'image/jpg', 'application/x-tar'
@@ -74,7 +80,7 @@ const fetchMethod = async (url: string, initialFetchConfig: DataObject, timeout 
      * @returns {Object} An {status, statusText, headers, data}
      * containing status and data from response.
   */
-const SendHTTPrequest = async (requestConfig: RequestConfig) => {
+const SendHTTPrequest = async (requestConfig: RequestConfig): Promise<result> => {
   // Headers settings
   const url = API_ENDPOINT + requestConfig.endpoint;
 
@@ -91,10 +97,14 @@ const SendHTTPrequest = async (requestConfig: RequestConfig) => {
   }
 
   try {
-    const responseObject = await fetchMethod(url, fetchConfig, requestConfig.timeout);
+    const responseObject: result = await fetchMethod(url, fetchConfig, requestConfig.timeout);
     return responseObject;
   } catch (error) {
-    return error;
+    console.warn(error)
+    return {
+      status: 500,
+      statusText: "notconnected"
+    }
   }
 };
 

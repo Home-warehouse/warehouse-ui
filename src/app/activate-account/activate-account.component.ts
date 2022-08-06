@@ -47,6 +47,11 @@ export class ActivateAccountComponent implements OnInit {
          type: 'SUCCESS'
       });
       this.router.navigate(['/dashboard'])
+    } else {
+      this.notifications.sendOpenNotificationEvent({
+        message: `Could not update account information`,
+        type: 'ERROR'
+      });
     }
   }
 
