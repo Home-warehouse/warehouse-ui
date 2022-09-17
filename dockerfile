@@ -1,7 +1,7 @@
 ### Stage 1: build ###
 FROM node:14.16.0-alpine as builder
-MAINTAINER Daniel Goliszewski "taafeenn@gmail.com"
-LABEL version="0.3.0"
+LABEL maintainer="Daniel Goliszewski taafeenn@gmail.com"
+LABEL version="0.3.4"
 
 # Set working directory.
 RUN mkdir /home-warehouse-ui
@@ -23,8 +23,8 @@ RUN npm run build -- --output-path=./dist/out
 ### Stage 2: delivery ###
 
 FROM nginx:1.15.7-alpine
-MAINTAINER Daniel Goliszewski "taafeenn@gmail.com"
-LABEL version="0.3.0"
+LABEL maintainer="Daniel Goliszewski taafeenn@gmail.com"
+LABEL version="0.3.4"
 
 # Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
