@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "dev": "ng serve -c development",
+    "prod": "sirv public --host 0.0.0.0 --no-clear --single",
     "start": "ng serve",
     "build": "ng build -c production",
     "watch": "ng build --watch --configuration development",
@@ -24,6 +25,7 @@
     "graphql": "^15.5.0",
     "jwt-decode": "^3.1.2",
     "rxjs": "~6.6.0",
+    "sirv-cli": "^2.0.2",
     "tslib": "^2.1.0",
     "universal-cookie": "^4.0.4",
     "zone.js": "~0.11.4"

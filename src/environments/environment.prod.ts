@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiIP: '',
+  apiIP: 'api/',
   intergrations: [
     {
       name: 'EVERNOTE',
