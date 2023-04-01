@@ -17,8 +17,6 @@ import { LocationsTableComponent } from './locations-manager/locations-table/loc
 import { RaportFormComponent } from './raport-form/raport-form.component';
 import { LocationsManagerComponent } from './locations-manager/locations-manager.component';
 import { RaportDisplayComponent } from './raport-display/raport-display.component';
-import { AutomatizationsListComponent } from './automatizations-list/automatizations-list.component';
-import { AutomatizationFormComponent } from './automatization-form/automatization-form.component';
 import { ActivateAccountComponent } from './activate-account/activate-account.component';
 import { UserManagingComponent } from './user-managing/user-managing.component';
 import { AddUserComponent } from './user-managing/add-user/add-user.component';
@@ -37,8 +35,6 @@ import { AddUserComponent } from './user-managing/add-user/add-user.component';
     RaportFormComponent,
     LocationsManagerComponent,
     RaportDisplayComponent,
-    AutomatizationsListComponent,
-    AutomatizationFormComponent,
     ActivateAccountComponent,
     UserManagingComponent,
     AddUserComponent,

@@ -18,5 +18,5 @@ RUN npm install
 COPY . /home-warehouse-ui
 
 # Build app
-CMD printf "export const environment = { production: true, apiIP: 'api/', intergrations: [ { name: 'EVERNOTE', integrated: false } ] };" > src/environments/environment.prod.ts; npm run build -- --output-path=/build_dir/output
+CMD printf "export const environment = { production: true, apiIP: 'api/' };" > src/environments/environment.prod.ts; npm run build -- --output-path=/build_dir/output
 

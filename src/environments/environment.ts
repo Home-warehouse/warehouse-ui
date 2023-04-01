@@ -4,13 +4,7 @@
 
 export const environment = {
   production: false,
-  apiIP: '',
-  intergrations: [
-    {
-      name: 'EVERNOTE',
-      integrated: true
-    }
-  ]
+  apiIP: ''
 };
 
 /*
