@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { hwAPI } from 'src/common/api/api';
 import { NotificationsSharedService } from '../notifications/notifications.sharedService';
 import { Router } from "@angular/router"
@@ -18,16 +18,16 @@ interface token {
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  SignInForm: FormGroup;
+  SignInForm: UntypedFormGroup;
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private router: Router,
     private notifications: NotificationsSharedService,
     private hwAPI: hwAPI,
   ) {
     this.SignInForm = this.fb.group({
-      email: new FormControl('', Validators.email),
-      password: new FormControl('', Validators.required)
+      email: new UntypedFormControl('', Validators.email),
+      password: new UntypedFormControl('', Validators.required)
     });
   }
 

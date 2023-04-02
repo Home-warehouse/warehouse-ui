@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormArray, UntypedFormControl, Validators } from '@angular/forms';
 import { hwAPI } from 'src/common/api/api';
 import getFormAsDict from 'src/common/form';
 import { Router } from '@angular/router'
@@ -29,7 +29,7 @@ enum filterSuffixType {
   styleUrls: ['./raport-form.component.scss']
 })
 export class RaportFormComponent implements OnInit {
-  RaportForm: FormGroup;
+  RaportForm: UntypedFormGroup;
   eSortByType = sortByType;
   eFilterByType = filterByType;
   eFilterSuffixType = filterSuffixType;
@@ -49,30 +49,30 @@ export class RaportFormComponent implements OnInit {
   constructor(
     private hwAPI: hwAPI,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private notifications: NotificationsSharedService,
   ) {
     this.RaportForm = this.fb.group({
-      raportName: new FormControl('', [Validators.required]),
-      description: new FormControl('', []),
-      shortResults: new FormControl(5, [Validators.required, Validators.min(0), Validators.max(20)]),
+      raportName: new UntypedFormControl('', [Validators.required]),
+      description: new UntypedFormControl('', []),
+      shortResults: new UntypedFormControl(5, [Validators.required, Validators.min(0), Validators.max(20)]),
       // rootLocation: new FormControl(0, [Validators.required]),
-      showCustomColumns: new FormControl([], [Validators.required]),
+      showCustomColumns: new UntypedFormControl([], [Validators.required]),
       sortBy: this.fb.group({
-        customColumn: new FormControl('', [Validators.required]),
-        value: new FormControl(null, [Validators.required])
+        customColumn: new UntypedFormControl('', [Validators.required]),
+        value: new UntypedFormControl(null, [Validators.required])
       }),
       filterBy: this.fb.array([])
     });
   }
 
   // Filters
-  get allfilters(): FormArray {
-    return this.RaportForm.controls["filterBy"] as FormArray;
+  get allfilters(): UntypedFormArray {
+    return this.RaportForm.controls["filterBy"] as UntypedFormArray;
   }
 
   addFilter() {
-      let control = <FormArray>this.RaportForm.controls.filterBy;
+      let control = <UntypedFormArray>this.RaportForm.controls.filterBy;
       control.push(
         this.fb.group({
           customColumn: [''],

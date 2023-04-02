@@ -1,5 +1,5 @@
-import { FormGroup} from '@angular/forms';
-const getFormAsDict = (form: FormGroup) => {
+import { UntypedFormGroup} from '@angular/forms';
+const getFormAsDict = (form: UntypedFormGroup) => {
   let formDict: any = {};
   Object.keys(form.value).forEach(element => {
     const field = form.get(String(element));
